@@ -1,0 +1,18 @@
+# Scala stuff
+*.class
+**/target/
+
+# IDE
+.idea
+*/.idea
+*.iml
+out
+
+# VS Code
+.vscode
+.metals
+.bloop
+metals.sbt
+
+# MacOS
+.DS_Store
