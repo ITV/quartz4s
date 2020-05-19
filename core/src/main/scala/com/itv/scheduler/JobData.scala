@@ -1,8 +1,6 @@
 package com.itv.scheduler
 
 import cats.implicits._
-import extruder.core._
-import extruder.map._
 import org.quartz.JobKey
 
 trait JobData {
@@ -14,15 +12,7 @@ trait JobDataEncoder[A] {
   def apply(a: A): JobData
 }
 
-object JobDataEncoder {
-  def forKey[A](jobKey: JobKey)(implicit multiShow: MultiShow[A]): JobDataEncoder[A] =
-    (a: A) =>
-      new JobData {
-        override def key: JobKey                  = jobKey
-        override def dataMap: Map[String, String] = encode(a)
-      }
-
-}
+object JobDataEncoder
 
 //sealed trait JobData extends Job with StrictLogging {
 //  def name: String
