@@ -11,12 +11,11 @@ import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
-import org.quartz.impl.StdSchedulerFactory._
 
 import scala.jdk.CollectionConverters._
 
 trait TaskScheduler[F[_], J] {
-  def scheduleJob(job: J, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
+  def scheduleJob(jobKey: JobKey, job: J, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
 }
 
 trait ScheduledMessageReceiver[F[_], A] {
@@ -31,6 +30,7 @@ class QuartzTaskScheduler[F[_], J, A](
     with ScheduledMessageReceiver[F, A] {
 
   override def scheduleJob(
+      jobKey: JobKey,
       job: J,
       triggerKey: TriggerKey,
       jobTimeSchedule: JobTimeSchedule
@@ -43,7 +43,7 @@ class QuartzTaskScheduler[F[_], J, A](
       val jobData = jobDataEncoder(job)
       val jobDetail =
         newJob(classOf[PublishCallbackJob])
-          .withIdentity(jobData.key)
+          .withIdentity(jobKey)
           .usingJobData(new JobDataMap(jobData.dataMap.asJava))
           .requestRecovery()
           .storeDurably()
@@ -57,13 +57,12 @@ class QuartzTaskScheduler[F[_], J, A](
 }
 
 object QuartzTaskScheduler {
-  def apply[F[_], J: JobDataEncoder, A](
-      jdbcConfig: JdbcConfig,
-      maxConnections: Int,
-  )(implicit F: ConcurrentEffect[F], jobDecoder: JobDecoder[F, A]): Resource[F, QuartzTaskScheduler[F, J, A]] =
+  def apply[F[_], J: JobDataEncoder, A: JobDecoder](
+      quartzProps: QuartzProperties,
+  )(implicit F: ConcurrentEffect[F]): Resource[F, QuartzTaskScheduler[F, J, A]] =
     Resource[F, QuartzTaskScheduler[F, J, A]]((for {
       messages  <- Queue.unbounded[F, A]
-      scheduler <- createScheduler(jdbcConfig, maxConnections, messages)
+      scheduler <- createScheduler(quartzProps, messages)
       _         <- F.delay(scheduler.start())
     } yield (scheduler, messages)).map {
       case (scheduler, messages) =>
@@ -71,31 +70,12 @@ object QuartzTaskScheduler {
         (quartzTaskScheduler, F.delay(scheduler.shutdown(true)))
     })
 
-  private def createScheduler[F[_], A](
-      jdbcConfig: JdbcConfig,
-      maxConnections: Int,
+  private def createScheduler[F[_], A: JobDecoder](
+      quartzProps: QuartzProperties,
       messages: Queue[F, A]
-  )(implicit F: ConcurrentEffect[F], jobDecoder: JobDecoder[F, A]) =
+  )(implicit F: ConcurrentEffect[F]): F[Scheduler] =
     F.delay {
-      val props = new java.util.Properties()
-      props.setProperty("org.quartz.jobStore.isClustered", "true")
-      props.setProperty(
-        "org.quartz.jobStore.driverDelegateClass",
-        "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate"
-      )
-      props.setProperty(PROP_THREAD_POOL_PREFIX + ".threadCount", maxConnections.toString)
-
-      props.setProperty(PROP_JOB_STORE_CLASS, "org.quartz.impl.jdbcjobstore.JobStoreTX")
-      val dataSourceName = "ds"
-      props.setProperty("org.quartz.jobStore.dataSource", dataSourceName)
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.provider", "hikaricp")
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.driver", jdbcConfig.driverClassName)
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.URL", jdbcConfig.url)
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.user", jdbcConfig.username)
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.password", jdbcConfig.password)
-      props.setProperty(s"org.quartz.dataSource.$dataSourceName.maxConnections", maxConnections.toString)
-
-      val sf                   = new StdSchedulerFactory(props)
+      val sf                   = new StdSchedulerFactory(quartzProps.properties)
       val scheduler: Scheduler = sf.getScheduler
       scheduler.setJobFactory(new Fs2StreamJobFactory[F, A](messages))
       scheduler

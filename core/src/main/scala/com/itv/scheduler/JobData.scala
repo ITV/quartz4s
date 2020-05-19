@@ -1,18 +1,24 @@
 package com.itv.scheduler
 
 import cats.implicits._
-import org.quartz.JobKey
+import cats.Contravariant
 
-trait JobData {
-  def key: JobKey
-  def dataMap: Map[String, String]
-}
+final case class JobData(dataMap: Map[String, String])
 
 trait JobDataEncoder[A] {
   def apply(a: A): JobData
 }
 
-object JobDataEncoder
+object JobDataEncoder {
+  implicit val contravariantJobDataEncoder: Contravariant[JobDataEncoder] = new Contravariant[JobDataEncoder] {
+    override def contramap[A, B](fa: JobDataEncoder[A])(f: B => A): JobDataEncoder[B] =
+      (b: B) => fa(f(b))
+  }
+}
+
+//object JobDataEncoder {
+//  def forKey(jobKey: JobKey): Map[String, String] => JobData = JobData(jobKey, _)
+//}
 
 //sealed trait JobData extends Job with StrictLogging {
 //  def name: String
