@@ -6,7 +6,6 @@ import java.util.Date
 import cats.effect._
 import cats.implicits._
 import fs2.concurrent.Queue
-import io.chrisdavenport.log4cats.Logger
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
@@ -27,7 +26,7 @@ trait ScheduledMessageReceiver[F[_], A] {
 class QuartzTaskScheduler[F[_], J, A](
     scheduler: Scheduler,
     val messages: Queue[F, A]
-)(implicit F: Sync[F], logger: Logger[F], jobDataEncoder: JobDataEncoder[J])
+)(implicit F: Sync[F], jobDataEncoder: JobDataEncoder[J])
     extends TaskScheduler[F, J]
     with ScheduledMessageReceiver[F, A] {
 
@@ -37,27 +36,24 @@ class QuartzTaskScheduler[F[_], J, A](
       jobTimeSchedule: JobTimeSchedule
   ): F[Option[Instant]] =
     F.delay {
-        val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
-          case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
-          case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
-        }
-        val jobData = jobDataEncoder(job)
-        val jobDetail =
-          newJob(classOf[PublishCallbackJob])
-            .withIdentity(jobData.key)
-            .usingJobData(new JobDataMap(jobData.dataMap.asJava))
-            .requestRecovery()
-            .storeDurably()
-            .build
-        val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobDetail)).build()
-        scheduler.addJob(jobDetail, true)
-        Option(scheduler.rescheduleJob(triggerKey, trigger))
-          .orElse(Option(scheduler.scheduleJob(trigger)))
-          .map(_.toInstant)
+      val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
+        case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
+        case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
       }
-      .flatTap { nextRunTimeMaybe =>
-        logger.info(s"$job scheduled, next run time is ${nextRunTimeMaybe.map(_.toString).getOrElse("Unknown")}")
-      }
+      val jobData = jobDataEncoder(job)
+      val jobDetail =
+        newJob(classOf[PublishCallbackJob])
+          .withIdentity(jobData.key)
+          .usingJobData(new JobDataMap(jobData.dataMap.asJava))
+          .requestRecovery()
+          .storeDurably()
+          .build
+      val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobDetail)).build()
+      scheduler.addJob(jobDetail, true)
+      Option(scheduler.rescheduleJob(triggerKey, trigger))
+        .orElse(Option(scheduler.scheduleJob(trigger)))
+        .map(_.toInstant)
+    }
 }
 
 object QuartzTaskScheduler {
@@ -66,11 +62,9 @@ object QuartzTaskScheduler {
       maxConnections: Int,
   )(implicit
       F: ConcurrentEffect[F],
-      logger: Logger[F],
       jobDeserializer: JobDecoder[F, A],
   ): Resource[F, QuartzTaskScheduler[F, J, A]] =
     Resource[F, QuartzTaskScheduler[F, J, A]]((for {
-      _         <- logger.info("Starting quartz scheduler ...")
       messages  <- Queue.unbounded[F, A]
       scheduler <- createScheduler(jdbcConfig, maxConnections, messages)
       _         <- F.delay(scheduler.start())

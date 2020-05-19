@@ -14,6 +14,4 @@ libraryDependencies ++= Seq(
   "org.quartz-scheduler" % "quartz"               % "2.3.2",
   "co.fs2"              %% "fs2-io"               % "2.3.0",
   "io.extruder"         %% "extruder-cats-effect" % "0.11.0",
-  "io.chrisdavenport"   %% "log4cats-slf4j"       % "1.1.1",
-  "ch.qos.logback"       % "logback-classic"      % "1.2.3",
 )
