@@ -14,4 +14,6 @@ object JobDataEncoder {
     override def contramap[A, B](fa: JobDataEncoder[A])(f: B => A): JobDataEncoder[B] =
       (b: B) => fa(f(b))
   }
+
+  def apply[A](implicit evidence: JobDataEncoder[A]): JobDataEncoder[A] = evidence
 }
