@@ -60,10 +60,7 @@ object QuartzTaskScheduler {
   def apply[F[_], J: JobDataEncoder, A](
       jdbcConfig: JdbcConfig,
       maxConnections: Int,
-  )(implicit
-      F: ConcurrentEffect[F],
-      jobDeserializer: JobDecoder[F, A],
-  ): Resource[F, QuartzTaskScheduler[F, J, A]] =
+  )(implicit F: ConcurrentEffect[F], jobDecoder: JobDecoder[F, A]): Resource[F, QuartzTaskScheduler[F, J, A]] =
     Resource[F, QuartzTaskScheduler[F, J, A]]((for {
       messages  <- Queue.unbounded[F, A]
       scheduler <- createScheduler(jdbcConfig, maxConnections, messages)
@@ -78,7 +75,7 @@ object QuartzTaskScheduler {
       jdbcConfig: JdbcConfig,
       maxConnections: Int,
       messages: Queue[F, A]
-  )(implicit F: ConcurrentEffect[F], jobDeserializer: JobDecoder[F, A]) =
+  )(implicit F: ConcurrentEffect[F], jobDecoder: JobDecoder[F, A]) =
     F.delay {
       val props = new java.util.Properties()
       props.setProperty("org.quartz.jobStore.isClustered", "true")
