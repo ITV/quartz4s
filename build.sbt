@@ -5,12 +5,28 @@ val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
   scalaVersion := "2.13.2",
   crossScalaVersions := Seq("2.12.11", scalaVersion.value),
+  credentials ++=
+    Seq(".itv-credentials", ".user-credentials", ".credentials")
+      .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
+  publishTo in ThisBuild := {
+    val artifactory = "https://itvrepos.jfrog.io/itvrepos/oasvc-ivy"
+    if (isSnapshot.value)
+      Some("Artifactory Realm" at artifactory)
+    else
+      Some("Artifactory Realm" at artifactory + ";build.timestamp=" + new java.util.Date().getTime)
+  },
 )
 
 def createProject(projectName: String): Project =
   Project(projectName, file(projectName))
     .settings(commonSettings)
     .settings(name := s"fs2-quartz-$projectName")
+
+lazy val root = (project in file("."))
+  .aggregate(core, extruder)
+  .settings(
+    publish / skip := true,
+  )
 
 lazy val core = createProject("core")
   .settings(

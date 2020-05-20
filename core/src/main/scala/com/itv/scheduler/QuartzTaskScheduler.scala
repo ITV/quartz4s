@@ -12,7 +12,7 @@ import org.quartz.TriggerBuilder._
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters._
 
 trait TaskScheduler[F[_], J] {
   def scheduleJob(jobKey: JobKey, job: J, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
