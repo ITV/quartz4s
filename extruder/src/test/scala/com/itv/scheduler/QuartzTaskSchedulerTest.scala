@@ -2,6 +2,7 @@ package com.itv.scheduler
 
 import java.time.Instant
 import java.util.Properties
+import java.util.concurrent.Executors
 
 import cats.effect._
 import cats.implicits._
@@ -50,8 +51,8 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
   behavior of "QuartzTaskScheduler"
 
   it should "schedule jobs to run every second" in {
-    val schedulerResource =
-      Blocker[IO] >>= (QuartzTaskScheduler[IO, ParentTestJob, ParentTestJob](_, quartzProperties))
+    val blocker           = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
+    val schedulerResource = QuartzTaskScheduler[IO, ParentTestJob, ParentTestJob](blocker, quartzProperties)
 
     val elementCount = 6
     val userJob      = UserJob("user-id-123")
