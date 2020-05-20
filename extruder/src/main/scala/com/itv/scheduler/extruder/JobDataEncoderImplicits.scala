@@ -5,6 +5,6 @@ import extruder.core._
 import extruder.map._
 
 trait JobDataEncoderImplicits {
-  implicit def showToJobDataEncoder[A](implicit show: Show[A]): JobDataEncoder[A] =
+  implicit def deriveEncoder[A](implicit enc: Encoder[EncodeDefault, Sett, A, EncodeData]): JobDataEncoder[A] =
     (a: A) => JobData(encode(a))
 }

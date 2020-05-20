@@ -9,7 +9,7 @@ import org.quartz.JobExecutionContext
 import scala.jdk.CollectionConverters._
 
 trait JobDecoderImplicits {
-  implicit def parserToJobDecoder[A: Parser]: JobDecoder[A] =
+  implicit def deriveDecoder[A](implicit dec: Decoder[DecodeDefault, Sett, A, DecodeData]): JobDecoder[A] =
     (jobExecutionContext: JobExecutionContext) => {
       Either
         .catchNonFatal(
