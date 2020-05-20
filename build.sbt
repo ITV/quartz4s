@@ -30,6 +30,8 @@ lazy val extruder = createProject("extruder")
       "org.scalatestplus" %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
       "com.dimafeng"      %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
       "com.dimafeng"      %% "testcontainers-scala-postgresql" % Versions.testContainers      % Test,
-      "org.postgresql"     % "postgresql"                      % "42.2.9"                     % Test,
+      "org.postgresql"     % "postgresql"                      % Versions.postgresql          % Test,
+      "org.flywaydb"       % "flyway-core"                     % Versions.flyway              % Test,
+      "ch.qos.logback"     % "logback-classic"                 % Versions.logback             % Test,
     ),
   )

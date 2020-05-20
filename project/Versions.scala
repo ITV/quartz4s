@@ -1,6 +1,9 @@
 object Versions {
   val extruder            = "0.11.0"
+  val flyway              = "6.4.2"
   val fs2                 = "2.3.0"
+  val logback             = "1.2.3"
+  val postgresql          = "42.2.9"
   val quartz              = "2.3.2"
   val scalatest           = "3.1.2"
   val scalatestScalacheck = "3.1.0.+"
