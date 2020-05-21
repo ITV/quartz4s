@@ -24,6 +24,7 @@ def createProject(projectName: String): Project =
 
 lazy val root = (project in file("."))
   .aggregate(core, extruder)
+  .settings(commonSettings)
   .settings(
     publish / skip := true,
   )
