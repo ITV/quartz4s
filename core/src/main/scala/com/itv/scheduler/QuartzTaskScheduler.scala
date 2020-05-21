@@ -77,14 +77,14 @@ object QuartzTaskScheduler {
   def apply[F[_]: ContextShift, J: JobDataEncoder, A: JobDecoder](
       blocker: Blocker,
       quartzProps: QuartzProperties,
-  )(implicit F: ConcurrentEffect[F]): Resource[F, TaskScheduler[F, J] with ScheduledMessageReceiver[F, A]] =
-    Resource[F, TaskScheduler[F, J] with ScheduledMessageReceiver[F, A]]((for {
+  )(implicit F: ConcurrentEffect[F]): Resource[F, MessageScheduler[F, J, A]] =
+    Resource[F, MessageScheduler[F, J, A]]((for {
       messages  <- Queue.unbounded[F, A]
       scheduler <- createScheduler(quartzProps, messages)
       _         <- F.delay(scheduler.start())
     } yield (scheduler, messages)).map {
       case (scheduler, messageQueue) =>
-        val quartzTaskScheduler: TaskScheduler[F, J] with ScheduledMessageReceiver[F, A] =
+        val quartzTaskScheduler: MessageScheduler[F, J, A] =
           new QuartzTaskScheduler[F, J](blocker, scheduler) with ScheduledMessageReceiver[F, A] {
             override val messages: Queue[F, A] = messageQueue
           }
