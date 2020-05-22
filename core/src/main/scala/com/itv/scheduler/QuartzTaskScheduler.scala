@@ -5,6 +5,7 @@ import java.util.Date
 
 import cats.effect._
 import cats.implicits._
+import cats.Apply
 import fs2.concurrent.Queue
 import org.quartz.CronScheduleBuilder._
 import org.quartz.JobBuilder._
@@ -15,7 +16,22 @@ import org.quartz.impl.StdSchedulerFactory
 import scala.collection.JavaConverters._
 
 trait TaskScheduler[F[_], J] {
-  def scheduleJob(jobKey: JobKey, job: J, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
+  def scheduleJob(
+      jobKey: JobKey,
+      job: J,
+      triggerKey: TriggerKey,
+      jobTimeSchedule: JobTimeSchedule
+  )(implicit F: Apply[F]): F[Option[Instant]] =
+    createJob(jobKey, job) *>
+      scheduleTrigger(jobKey, triggerKey, jobTimeSchedule)
+
+  def createJob(jobKey: JobKey, job: J): F[Unit]
+
+  def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
+
+  def deleteJob(jobKey: JobKey): F[Unit]
+
+  def pauseTrigger(triggerKey: TriggerKey): F[Unit]
 }
 
 trait ScheduledMessageReceiver[F[_], A] {
@@ -28,36 +44,20 @@ class QuartzTaskScheduler[F[_], J](
 )(implicit F: Sync[F], CS: ContextShift[F], jobDataEncoder: JobDataEncoder[J])
     extends TaskScheduler[F, J] {
 
-  override def scheduleJob(
-      jobKey: JobKey,
-      job: J,
-      triggerKey: TriggerKey,
-      jobTimeSchedule: JobTimeSchedule
-  ): F[Option[Instant]] =
-    createJobDetail(jobKey, job) >>= { jobDetail =>
-      addJobToScheduler(jobDetail) *>
-        addTriggerToScheduler(jobDetail, triggerKey, jobTimeSchedule)
-    }
-
-  private def createJobDetail(jobKey: JobKey, job: J): F[JobDetail] =
-    F.delay {
+  override def createJob(jobKey: JobKey, job: J): F[Unit] =
+    blocker.delay {
       val jobData: JobData = jobDataEncoder(job)
-      newJob(classOf[PublishCallbackJob])
+      val jobDetail = newJob(classOf[PublishCallbackJob])
         .withIdentity(jobKey)
         .usingJobData(new JobDataMap(jobData.dataMap.asJava))
         .requestRecovery()
         .storeDurably()
         .build
-    }
-
-  private def addJobToScheduler(jobDetail: JobDetail): F[Unit] =
-    blocker.delay {
-      println(s"Adding job: $jobDetail")
       scheduler.addJob(jobDetail, true)
     }
 
-  private def addTriggerToScheduler(
-      jobDetail: JobDetail,
+  override def scheduleTrigger(
+      jobKey: JobKey,
       triggerKey: TriggerKey,
       jobTimeSchedule: JobTimeSchedule
   ): F[Option[Instant]] =
@@ -66,10 +66,20 @@ class QuartzTaskScheduler[F[_], J](
         case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
         case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
       }
-      val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobDetail)).build()
+      val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobKey)).build()
       Option(scheduler.rescheduleJob(triggerKey, trigger))
         .orElse(Option(scheduler.scheduleJob(trigger)))
         .map(_.toInstant)
+    }
+
+  override def deleteJob(jobKey: JobKey): F[Unit] =
+    blocker.delay {
+      scheduler.deleteJob(jobKey)
+    }
+
+  override def pauseTrigger(triggerKey: TriggerKey): F[Unit] =
+    blocker.delay {
+      scheduler.pauseTrigger(triggerKey)
     }
 }
 
