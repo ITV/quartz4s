@@ -86,6 +86,12 @@ class QuartzTaskScheduler[F[_], J](
 object QuartzTaskScheduler {
   def apply[F[_]: ContextShift, J: JobDataEncoder, A: JobDecoder](
       blocker: Blocker,
+      quartzConfig: Fs2QuartzConfig,
+  )(implicit F: ConcurrentEffect[F]): Resource[F, MessageScheduler[F, J, A]] =
+    apply(blocker, quartzConfig.toQuartzProperties)
+
+  def apply[F[_]: ContextShift, J: JobDataEncoder, A: JobDecoder](
+      blocker: Blocker,
       quartzProps: QuartzProperties,
   )(implicit F: ConcurrentEffect[F]): Resource[F, MessageScheduler[F, J, A]] =
     Resource[F, MessageScheduler[F, J, A]]((for {

@@ -32,8 +32,11 @@ lazy val root = (project in file("."))
 lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
-      "org.quartz-scheduler" % "quartz" % Versions.quartz,
-      "co.fs2"              %% "fs2-io" % Versions.fs2,
+      "org.quartz-scheduler" % "quartz"          % Versions.quartz,
+      "co.fs2"              %% "fs2-io"          % Versions.fs2,
+      "org.scalatest"       %% "scalatest"       % Versions.scalatest           % Test,
+      "org.scalatestplus"   %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
+      "org.postgresql"       % "postgresql"      % Versions.postgresql          % Test,
     ),
   )
 
