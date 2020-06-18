@@ -4,8 +4,8 @@ Quarts scheduler library using fs2
 ### Import
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "fs2-quartz-core"     % "@FS2_QUARTZ_VERSION@",
-  "com.itv" %% "fs2-quartz-extruder" % "@FS2_QUARTZ_VERSION@"
+  "com.itv" %% "fs2-quartz-core"     % "@VERSION@",
+  "com.itv" %% "fs2-quartz-extruder" % "@VERSION@"
 )
 ```
 
