@@ -8,12 +8,14 @@ import cats.implicits._
 import cats.Apply
 import fs2.concurrent.Queue
 import org.quartz.CronScheduleBuilder._
+import org.quartz.SimpleScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration._
 
 trait TaskScheduler[F[_], J] {
   def scheduleJob(
@@ -65,6 +67,7 @@ class QuartzTaskScheduler[F[_], J](
       val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
         case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
         case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
+        case SimpleJob(repeatEvery)           => _.withSchedule(repeatSecondlyForever(repeatEvery.toSeconds.toInt.max(1)))
       }
       val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobKey)).build()
       Option(scheduler.rescheduleJob(triggerKey, trigger))
