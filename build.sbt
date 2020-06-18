@@ -64,7 +64,7 @@ lazy val docs = project
   .settings(
     mdocOut := baseDirectory.in(ThisBuild).value,
     mdocVariables := Map(
-      "VERSION" -> version.value
+      "FS2_QUARTZ_VERSION" -> version.value
     )
   )
   .dependsOn(core, extruder)
