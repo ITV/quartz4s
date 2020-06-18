@@ -57,3 +57,15 @@ lazy val extruder = createProject("extruder")
       "ch.qos.logback"     % "logback-classic"                 % Versions.logback             % Test,
     ),
   )
+
+lazy val docs = project
+  .in(file("fs2-quartz-docs"))
+  .settings(commonSettings)
+  .settings(
+    mdocOut := baseDirectory.in(ThisBuild).value,
+    mdocVariables := Map(
+      "FS2_QUARTZ_VERSION" -> version.value
+    )
+  )
+  .dependsOn(core, extruder)
+  .enablePlugins(MdocPlugin)
