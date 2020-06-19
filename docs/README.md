@@ -56,17 +56,23 @@ val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
 ```
 #### Auto-ACKed messages
-Scheduled jobs from quartz bundled into a `AckableMessage(message: A, acker: Deferred[Either[Throwable, Unit]])`.
-The quartz job is only marked as complete once the `ackableMessage.acker.complete(result: Either[Throwable, Unit])` is called.
-```scala mdoc
-val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
-  Fs2StreamJobFactory.acking(ackableJobMessageQueue)
+Scheduled jobs from quartz are bundled into a `message: A` and a `acker: MessageAcker[F, A]`.
+The items in the queue are each `Resource[F, A]` which uses the message and acks the message as the Resource is used.
 
+Alternatively the lower-level way of handling each message is via a queue of
+`AckableMessage[F, A](message: A, acker: MessageAcker[F, A])` items where the message is explicitly acked by the user.
+
+The quartz job is only marked as complete once the `acker.complete(result: Either[Throwable, Unit])` is called.
+```scala mdoc
 // or each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
 val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
+
+// or each message is wrapped as a `AckableMessage` which acks on completion
+val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
+val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
+  Fs2StreamJobFactory.acking(ackableJobMessageQueue)
 ```
 
 ### Creating a scheduler

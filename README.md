@@ -51,28 +51,35 @@ import fs2.concurrent.Queue
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@6270f2a5
+// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@43b57846
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@24962b01
+// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@10b67a8c
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
-// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@588d2276
+// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@478684c9
 ```
 #### Auto-ACKed messages
-Scheduled jobs from quartz bundled into a `AckableMessage(message: A, acker: Deferred[Either[Throwable, Unit]])`.
-The quartz job is only marked as complete once the `ackableMessage.acker.complete(result: Either[Throwable, Unit])` is called.
+Scheduled jobs from quartz are bundled into a `message: A` and a `acker: MessageAcker[F, A]`.
+The items in the queue are each `Resource[F, A]` which uses the message and acks the message as the Resource is used.
+
+Alternatively the lower-level way of handling each message is via a queue of
+`AckableMessage[F, A](message: A, acker: MessageAcker[F, A])` items where the message is explicitly acked by the user.
+
+The quartz job is only marked as complete once the `acker.complete(result: Either[Throwable, Unit])` is called.
 ```scala
-val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@50d54ad1
-val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
-  Fs2StreamJobFactory.acking(ackableJobMessageQueue)
-// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@4d939d1f
 // or each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@58c8798f
+// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@114d893e
 val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
-// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@69e76e72
+// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@887649b
+
+// or each message is wrapped as a `AckableMessage` which acks on completion
+val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
+// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@2b461d1d
+val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
+  Fs2StreamJobFactory.acking(ackableJobMessageQueue)
+// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@58156470
 ```
 
 ### Creating a scheduler
@@ -85,18 +92,18 @@ import _root_.extruder.map._
 val quartzProperties = QuartzProperties(new java.util.Properties())
 // quartzProperties: QuartzProperties = QuartzProperties({})
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-// blocker: Blocker = cats.effect.Blocker@536f3d51
+// blocker: Blocker = cats.effect.Blocker@48b1c7ca
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
   QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, autoAckJobFactory)
 // schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] = Allocate(
 //   Map(
 //     Bind(
 //       Delay(
-//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5432/575277791@2d398ac5
+//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5457/512342845@3763be2c
 //       ),
-//       cats.FlatMap$$Lambda$5434/1696739894@3edeb7f9
+//       cats.FlatMap$$Lambda$5459/380346124@1d6e312b
 //     ),
-//     scala.Function1$$Lambda$5422/1187066959@1e5b3fa0,
+//     scala.Function1$$Lambda$5447/1657251614@3ebf89e2,
 //     1
 //   )
 // )
