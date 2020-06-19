@@ -4,8 +4,8 @@ Quarts scheduler library using fs2
 ### Import
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "fs2-quartz-core"     % "0.6.2-SNAPSHOT",
-  "com.itv" %% "fs2-quartz-extruder" % "0.6.2-SNAPSHOT"
+  "com.itv" %% "fs2-quartz-core"     % "0.6.3-SNAPSHOT",
+  "com.itv" %% "fs2-quartz-extruder" % "0.6.3-SNAPSHOT"
 )
 ```
 
@@ -52,25 +52,25 @@ import extruder.map._
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@5707884e
+// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@9d94316
 
 val quartzProperties = QuartzProperties(new java.util.Properties())
 // quartzProperties: QuartzProperties = QuartzProperties({})
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-// blocker: Blocker = cats.effect.Blocker@7304295e
+// blocker: Blocker = cats.effect.Blocker@14fd58a9
 val schedulerResource: Resource[IO, MessageScheduler[IO, ParentJob, ParentJob]] =
   QuartzTaskScheduler[IO, ParentJob, ParentJob](blocker, quartzProperties)
 // schedulerResource: Resource[IO, MessageScheduler[IO, ParentJob, ParentJob]] = Allocate(
 //   Map(
 //     Bind(
 //       Map(
-//         Delay(cats.effect.concurrent.Ref$$$Lambda$6190/2102312793@1b16ddad),
-//         scala.Function1$$Lambda$6198/26700562@d38313a,
+//         Delay(cats.effect.concurrent.Ref$$$Lambda$5414/1030571423@34dba820),
+//         scala.Function1$$Lambda$5422/1624867808@57d647de,
 //         1
 //       ),
-//       com.itv.scheduler.QuartzTaskScheduler$$$Lambda$6199/2073903744@37414747
+//       com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5423/1337265300@430f7522
 //     ),
-//     scala.Function1$$Lambda$6198/26700562@4dafb8a5,
+//     scala.Function1$$Lambda$5422/1624867808@6964cfa9,
 //     1
 //   )
 // )

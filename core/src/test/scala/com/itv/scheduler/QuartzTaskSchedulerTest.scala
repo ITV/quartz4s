@@ -7,7 +7,6 @@ import java.util.concurrent.Executors
 import cats.effect._
 import cats.implicits._
 import com.dimafeng.testcontainers._
-import com.itv.scheduler.extruder.implicits._
 import org.flywaydb.core.Flyway
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach

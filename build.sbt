@@ -32,12 +32,16 @@ lazy val root = (project in file("."))
 lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
-      "org.quartz-scheduler" % "quartz"          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
-      "co.fs2"              %% "fs2-io"          % Versions.fs2,
-      "org.scalatest"       %% "scalatest"       % Versions.scalatest           % Test,
-      "org.scalatestplus"   %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
-      "org.postgresql"       % "postgresql"      % Versions.postgresql          % Test,
-      "com.zaxxer"           % "HikariCP"        % Versions.hikari              % Test,
+      "org.quartz-scheduler" % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "co.fs2"              %% "fs2-io"                          % Versions.fs2,
+      "org.scalatest"       %% "scalatest"                       % Versions.scalatest           % Test,
+      "org.scalatestplus"   %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
+      "com.dimafeng"        %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
+      "com.dimafeng"        %% "testcontainers-scala-postgresql" % Versions.testContainers      % Test,
+      "org.postgresql"       % "postgresql"                      % Versions.postgresql          % Test,
+      "com.zaxxer"           % "HikariCP"                        % Versions.hikari              % Test,
+      "org.flywaydb"         % "flyway-core"                     % Versions.flyway              % Test,
+      "ch.qos.logback"       % "logback-classic"                 % Versions.logback             % Test,
     ),
   )
 
@@ -46,15 +50,11 @@ lazy val extruder = createProject("extruder")
   .settings(
     resolvers += Resolver.bintrayRepo("janstenpickle", "extruder"),
     libraryDependencies ++= Seq(
-      "io.extruder"       %% "extruder-cats-effect"            % Versions.extruder,
-      "org.scalatest"     %% "scalatest"                       % Versions.scalatest           % Test,
-      "org.scalatestplus" %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
-      "com.dimafeng"      %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
-      "com.dimafeng"      %% "testcontainers-scala-postgresql" % Versions.testContainers      % Test,
-      "org.postgresql"     % "postgresql"                      % Versions.postgresql          % Test,
-      "com.zaxxer"         % "HikariCP"                        % Versions.hikari              % Test,
-      "org.flywaydb"       % "flyway-core"                     % Versions.flyway              % Test,
-      "ch.qos.logback"     % "logback-classic"                 % Versions.logback             % Test,
+      "io.extruder"       %% "extruder-cats-effect" % Versions.extruder,
+      "org.scalatest"     %% "scalatest"            % Versions.scalatest           % Test,
+      "org.scalatestplus" %% "scalacheck-1-14"      % Versions.scalatestScalacheck % Test,
+      "org.scalamock"     %% "scalamock"            % Versions.scalamock           % Test,
+      "ch.qos.logback"     % "logback-classic"      % Versions.logback             % Test,
     ),
   )
 
