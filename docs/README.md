@@ -46,7 +46,7 @@ object ParentJob {
 ```scala mdoc
 import java.util.concurrent.Executors
 import cats.effect._
-import com.itv.scheduler.{JobDecoder, MessageScheduler, QuartzProperties, QuartzTaskScheduler}
+import com.itv.scheduler.{Fs2StreamJobFactory, JobDecoder, QuartzProperties, QuartzTaskScheduler}
 import com.itv.scheduler.extruder.implicits._
 import extruder.map._
 import scala.concurrent.ExecutionContext
@@ -55,8 +55,10 @@ implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.g
 
 val quartzProperties = QuartzProperties(new java.util.Properties())
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-val schedulerResource: Resource[IO, MessageScheduler[IO, ParentJob, ParentJob]] =
-  QuartzTaskScheduler[IO, ParentJob, ParentJob](blocker, quartzProperties)
+val messageQueue = fs2.concurrent.Queue.unbounded[IO, ParentJob].unsafeRunSync()
+val jobFactory   = Fs2StreamJobFactory.autoAck[IO, ParentJob](messageQueue)
+val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
+  QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, jobFactory)
 ```
 
 ### Using the scheduler
@@ -65,7 +67,7 @@ import java.time.Instant
 import com.itv.scheduler._
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 
-def scheduleCronJob(scheduler: MessageScheduler[IO, ParentJob, ParentJob]): IO[Option[Instant]] =
+def scheduleCronJob(scheduler: QuartzTaskScheduler[IO, ParentJob]): IO[Option[Instant]] =
   scheduler.scheduleJob(
     JobKey.jobKey("child-object-job"),
     ChildObjectJob,
@@ -73,7 +75,7 @@ def scheduleCronJob(scheduler: MessageScheduler[IO, ParentJob, ParentJob]): IO[O
     CronScheduledJob(new CronExpression("* * * ? * *"))
   )
 
-def scheduleSingleJob(scheduler: MessageScheduler[IO, ParentJob, ParentJob]): IO[Option[Instant]] =
+def scheduleSingleJob(scheduler: QuartzTaskScheduler[IO, ParentJob]): IO[Option[Instant]] =
   scheduler.scheduleJob(
     JobKey.jobKey("single-user-job"),
     UserJob("user-123"),
