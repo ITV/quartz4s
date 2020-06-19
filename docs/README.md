@@ -46,23 +46,27 @@ There are 2 options when creating a `CallbackJobFactory`:
 Scheduled jobs from quartz are immediately acked and the resulting message of type `A` is placed on a `Queue[F, A]`
 ```scala mdoc
 import cats.effect._
-import com.itv.scheduler.Fs2StreamJobFactory
+import com.itv.scheduler._
 import fs2.concurrent.Queue
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-val autoAckJobFactory = Fs2StreamJobFactory.autoAck[IO, ParentJob](jobMessageQueue)
+val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
 ```
 #### Auto-ACKed messages
 Scheduled jobs from quartz bundled into a `AckableMessage(message: A, acker: Deferred[Either[Throwable, Unit]])`.
 The quartz job is only marked as complete once the `ackableMessage.acker.complete(result: Either[Throwable, Unit])` is called.
 ```scala mdoc
-import com.itv.scheduler.AckableMessage
-
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-val explicitAckobFactory = Fs2StreamJobFactory.explicitAck[IO, ParentJob](ackableJobMessageQueue)
+val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
+  Fs2StreamJobFactory.acking(ackableJobMessageQueue)
+
+// or each message is wrapped as a `Resource` which acks on completion
+val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
+val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
+  Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
 ```
 
 ### Creating a scheduler
@@ -70,7 +74,7 @@ val explicitAckobFactory = Fs2StreamJobFactory.explicitAck[IO, ParentJob](ackabl
 import java.util.concurrent.Executors
 import com.itv.scheduler.{JobDecoder, QuartzProperties, QuartzTaskScheduler}
 import com.itv.scheduler.extruder.implicits._
-import extruder.map._
+import _root_.extruder.map._
 
 val quartzProperties = QuartzProperties(new java.util.Properties())
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))

@@ -53,7 +53,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
   it should "schedule jobs to run every second" in {
     val blocker           = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
     val messageQueue      = Queue.unbounded[IO, ParentTestJob].unsafeRunSync()
-    val jobFactory        = Fs2StreamJobFactory.autoAck[IO, ParentTestJob](messageQueue)
+    val jobFactory        = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue)
     val schedulerResource = QuartzTaskScheduler[IO, ParentTestJob](blocker, quartzProperties, jobFactory)
 
     val elementCount = 6
