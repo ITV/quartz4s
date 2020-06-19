@@ -42,7 +42,7 @@ object ParentJob {
 
 ### Create a JobFactory
 There are 2 options when creating a `CallbackJobFactory`:
-#### Auto-ACKed messages
+#### Auto-Acked messages
 Scheduled jobs from quartz are immediately acked and the resulting message of type `A` is placed on a `Queue[F, A]`
 ```scala mdoc
 import cats.effect._
@@ -55,7 +55,8 @@ implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.g
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
 ```
-#### Auto-ACKed messages
+
+#### Manually Acked messages
 Scheduled jobs from quartz are bundled into a `message: A` and a `acker: MessageAcker[F, A]`.
 The items in the queue are each `Resource[F, A]` which uses the message and acks the message as the Resource is used.
 

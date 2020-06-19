@@ -42,7 +42,7 @@ object ParentJob {
 
 ### Create a JobFactory
 There are 2 options when creating a `CallbackJobFactory`:
-#### Auto-ACKed messages
+#### Auto-Acked messages
 Scheduled jobs from quartz are immediately acked and the resulting message of type `A` is placed on a `Queue[F, A]`
 ```scala
 import cats.effect._
@@ -51,14 +51,15 @@ import fs2.concurrent.Queue
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@6837663f
+// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@44aeb6be
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@32d1d876
+// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@1aab54d8
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
-// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@7c921cdc
+// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@5182b822
 ```
-#### Auto-ACKed messages
+
+#### Manually Acked messages
 Scheduled jobs from quartz are bundled into a `message: A` and a `acker: MessageAcker[F, A]`.
 The items in the queue are each `Resource[F, A]` which uses the message and acks the message as the Resource is used.
 
@@ -69,17 +70,17 @@ The quartz job is only marked as complete once the `acker.complete(result: Eithe
 ```scala
 // or each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@738a217c
+// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@640c4a33
 val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
-// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@2bf6bbe
+// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@38d8c749
 
 // or each message is wrapped as a `AckableMessage` which acks on completion
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@3e9111f7
+// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@7815491e
 val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
   Fs2StreamJobFactory.acking(ackableJobMessageQueue)
-// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@52099e05
+// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@3c12ad96
 ```
 
 ### Creating a scheduler
@@ -92,18 +93,18 @@ import _root_.extruder.map._
 val quartzProperties = QuartzProperties(new java.util.Properties())
 // quartzProperties: QuartzProperties = QuartzProperties({})
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-// blocker: Blocker = cats.effect.Blocker@1c6e07dd
+// blocker: Blocker = cats.effect.Blocker@4fc5aab6
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
   QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, autoAckJobFactory)
 // schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] = Allocate(
 //   Map(
 //     Bind(
 //       Delay(
-//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5965/557899085@5f2b6c9
+//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5491/88922996@beb6861
 //       ),
-//       cats.FlatMap$$Lambda$5967/1298241693@67e32845
+//       cats.FlatMap$$Lambda$5493/296260846@280891bc
 //     ),
-//     scala.Function1$$Lambda$5955/524581053@494a89c9,
+//     scala.Function1$$Lambda$5481/1715681056@6afec2e5,
 //     1
 //   )
 // )
