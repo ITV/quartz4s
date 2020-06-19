@@ -23,7 +23,7 @@ def createProject(projectName: String): Project =
     .settings(name := s"fs2-quartz-$projectName")
 
 lazy val root = (project in file("."))
-  .aggregate(core, extruder)
+  .aggregate(core, extruder, docs)
   .settings(commonSettings)
   .settings(
     publish / skip := true,
