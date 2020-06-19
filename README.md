@@ -4,8 +4,8 @@ Quarts scheduler library using fs2
 ### Import
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "fs2-quartz-core"     % "0.6.4-SNAPSHOT",
-  "com.itv" %% "fs2-quartz-extruder" % "0.6.4-SNAPSHOT"
+  "com.itv" %% "fs2-quartz-core"     % "0.7.0",
+  "com.itv" %% "fs2-quartz-extruder" % "0.7.0"
 )
 ```
 
@@ -51,12 +51,12 @@ import fs2.concurrent.Queue
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@43b57846
+// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@6837663f
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@10b67a8c
+// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@32d1d876
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
-// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@478684c9
+// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@7c921cdc
 ```
 #### Auto-ACKed messages
 Scheduled jobs from quartz are bundled into a `message: A` and a `acker: MessageAcker[F, A]`.
@@ -69,17 +69,17 @@ The quartz job is only marked as complete once the `acker.complete(result: Eithe
 ```scala
 // or each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@114d893e
+// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@738a217c
 val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
-// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@887649b
+// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@2bf6bbe
 
 // or each message is wrapped as a `AckableMessage` which acks on completion
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@2b461d1d
+// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@3e9111f7
 val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
   Fs2StreamJobFactory.acking(ackableJobMessageQueue)
-// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@58156470
+// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@52099e05
 ```
 
 ### Creating a scheduler
@@ -92,18 +92,18 @@ import _root_.extruder.map._
 val quartzProperties = QuartzProperties(new java.util.Properties())
 // quartzProperties: QuartzProperties = QuartzProperties({})
 val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-// blocker: Blocker = cats.effect.Blocker@48b1c7ca
+// blocker: Blocker = cats.effect.Blocker@1c6e07dd
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
   QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, autoAckJobFactory)
 // schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] = Allocate(
 //   Map(
 //     Bind(
 //       Delay(
-//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5457/512342845@3763be2c
+//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5965/557899085@5f2b6c9
 //       ),
-//       cats.FlatMap$$Lambda$5459/380346124@1d6e312b
+//       cats.FlatMap$$Lambda$5967/1298241693@67e32845
 //     ),
-//     scala.Function1$$Lambda$5447/1657251614@3ebf89e2,
+//     scala.Function1$$Lambda$5955/524581053@494a89c9,
 //     1
 //   )
 // )
