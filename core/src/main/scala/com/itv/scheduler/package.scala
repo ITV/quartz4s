@@ -1,5 +1,7 @@
 package com.itv
 
+import cats.effect.concurrent.Deferred
+
 package object scheduler {
-  type MessageScheduler[F[_], J, A] = TaskScheduler[F, J] with ScheduledMessageReceiver[F, A]
+  type MessageAcker[F[_], A] = Deferred[F, Either[Throwable, Unit]]
 }

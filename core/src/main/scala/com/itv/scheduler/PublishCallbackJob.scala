@@ -1,13 +1,32 @@
 package com.itv.scheduler
 
+import cats.effect._
+import cats.effect.concurrent.Deferred
 import cats.implicits._
 import org.quartz._
 
 import scala.util.Either
 
-abstract class PublishCallbackJob extends Job {
-  def handleMessage: JobExecutionContext => Either[Throwable, Unit]
+sealed trait PublishCallbackJob extends Job
 
-  override def execute(context: JobExecutionContext): Unit =
-    handleMessage(context).valueOr(throw _)
+private[scheduler] sealed abstract class IoPublishCallbackJob[F[_], A](implicit
+    F: ConcurrentEffect[F],
+    jobDecoder: JobDecoder[A]
+) extends PublishCallbackJob {
+  def handleMessage: A => F[Unit]
+
+  override def execute(jobExecutionContext: JobExecutionContext): Unit =
+    F.toIO(jobDecoder(jobExecutionContext).liftTo[F] >>= handleMessage).unsafeRunSync()
+}
+
+final class AutoAckCallbackJob[F[_], A](val handleMessage: A => F[Unit])(implicit
+    F: ConcurrentEffect[F],
+    jobDecoder: JobDecoder[A]
+) extends IoPublishCallbackJob
+
+final class ExplicitAckCallbackJob[F[_], A](emitMessage: A => F[Deferred[F, Either[Throwable, Unit]]])(implicit
+    F: ConcurrentEffect[F],
+    jobDecoder: JobDecoder[A]
+) extends IoPublishCallbackJob {
+  override def handleMessage: A => F[Unit] = emitMessage(_) >>= (_.get.rethrow)
 }

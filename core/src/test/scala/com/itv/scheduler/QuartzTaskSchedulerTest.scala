@@ -7,6 +7,7 @@ import java.util.concurrent.Executors
 import cats.effect._
 import cats.implicits._
 import com.dimafeng.testcontainers._
+import fs2.concurrent.Queue
 import org.flywaydb.core.Flyway
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach
@@ -51,7 +52,9 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
 
   it should "schedule jobs to run every second" in {
     val blocker           = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-    val schedulerResource = QuartzTaskScheduler[IO, ParentTestJob, ParentTestJob](blocker, quartzProperties)
+    val messageQueue      = Queue.unbounded[IO, ParentTestJob].unsafeRunSync()
+    val jobFactory        = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue)
+    val schedulerResource = QuartzTaskScheduler[IO, ParentTestJob](blocker, quartzProperties, jobFactory)
 
     val elementCount = 6
     val userJob      = UserJob("user-id-123")
@@ -74,7 +77,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          scheduler.messages.dequeue.take(elementCount).compile.toList
+          messageQueue.dequeue.take(elementCount).compile.toList
       }
       .unsafeRunTimed(10.seconds)
       .getOrElse(fail("Operation timed out completing"))
