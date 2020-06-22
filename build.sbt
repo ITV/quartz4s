@@ -60,12 +60,17 @@ lazy val extruder = createProject("extruder")
 
 lazy val docs = project
   .in(file("fs2-quartz-docs"))
+  .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
+    skip in publish := true,
     mdocOut := baseDirectory.in(ThisBuild).value,
     mdocVariables := Map(
       "FS2_QUARTZ_VERSION" -> version.value
-    )
+    ),
+    releaseProcess := Seq[ReleaseStep](
+      ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
+      ReleaseMdocStateTransformations.commitMdoc,
+    ),
   )
   .dependsOn(core, extruder)
-  .enablePlugins(MdocPlugin)
