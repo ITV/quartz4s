@@ -7,7 +7,7 @@ object Versions {
   val postgresql          = "42.2.9"
   val quartz              = "2.3.2"
   val scalatest           = "3.1.2"
-  val scalatestScalacheck = "3.1.0.+"
+  val scalatestScalacheck = "3.1.2.0"
   val scalamock           = "4.4.0"
   val testContainers      = "0.36.1"
 }
