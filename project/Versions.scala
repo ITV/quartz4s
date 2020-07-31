@@ -1,6 +1,6 @@
 object Versions {
   val extruder            = "0.11.0"
-  val flyway              = "6.4.2"
+  val flyway              = "6.4.4"
   val fs2                 = "2.3.0"
   val hikari              = "3.4.5"
   val logback             = "1.2.3"
@@ -8,6 +8,6 @@ object Versions {
   val quartz              = "2.3.2"
   val scalatest           = "3.1.2"
   val scalatestScalacheck = "3.1.0.+"
-  val scalamock           = "5.0.0"
-  val testContainers      = "0.36.1"
+  val scalamock           = "4.4.0"
+  val testContainers      = "0.38.1"
 }
