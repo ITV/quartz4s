@@ -65,13 +65,13 @@ val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessage
 ```
 
 #### Manually Acked messages
-Scheduled jobs are received but only acked with quartz once the handler has completed via an `acker: MessageAcker[F, A]`.
+Scheduled jobs are received but only acked with quartz once the handler has completed via an `acker: MessageAcker[F]`.
 
-Scheduled jobs from quartz are bundled into a `message: A` and an `acker: MessageAcker[F, A]`.
+Scheduled jobs from quartz are bundled into a `message: A` and an `acker: MessageAcker[F]`.
 The items in the queue are each a `Resource[F, A]` which uses the message and acks the message as the `Resource` is `use`d.
 
 Alternatively the lower-level way of handling each message is via a queue of
-`AckableMessage[F, A](message: A, acker: MessageAcker[F, A])` items where the message is explicitly acked by the user.
+`AckableMessage[F, A](message: A, acker: MessageAcker[F])` items where the message is explicitly acked by the user.
 
 In both cases, the quartz job is only marked as complete once the `acker.complete(result: Either[Throwable, Unit])` is called.
 ```scala mdoc

@@ -1,7 +1,10 @@
 package com.itv.scheduler
 
+import cats.{Applicative, Defer, MonadError}
 import cats.effect._
-import cats.effect.concurrent.Deferred
+import cats.effect.kernel.Deferred
+import cats.effect.kernel.Resource.ExitCase
+import cats.effect.unsafe.UnsafeRun
 import cats.implicits._
 import fs2.concurrent.Queue
 import org.quartz.{Job, Scheduler}
@@ -24,15 +27,15 @@ trait MessageQueueJobFactory[F[_], A] extends CallbackJobFactory {
   def messages: Queue[F, A]
 }
 
-class AutoAckingQueueJobFactory[F[_]: ConcurrentEffect, A: JobDecoder](
+class AutoAckingQueueJobFactory[F[_]: MonadError[*[_], Throwable]: UnsafeRun, A: JobDecoder](
     override val messages: Queue[F, A]
 ) extends MessageQueueJobFactory[F, A] {
   override def createCallbackJob: AutoAckCallbackJob[F, A] = new AutoAckCallbackJob[F, A](messages.enqueue1)
 }
 
-final case class AckableMessage[F[_], A](message: A, acker: MessageAcker[F, A])
+final case class AckableMessage[F[_], A](message: A, acker: MessageAcker[F])
 
-class AckingQueueJobFactory[F[_]: ConcurrentEffect, M[*[_], _], A: JobDecoder](
+class AckingQueueJobFactory[F[_]: Concurrent: UnsafeRun, M[*[_], _], A: JobDecoder](
     override val messages: Queue[F, M[F, A]],
     messageConverter: (A, Deferred[F, Either[Throwable, Unit]]) => M[F, A]
 ) extends MessageQueueJobFactory[F, M[F, A]] {
@@ -43,28 +46,30 @@ class AckingQueueJobFactory[F[_]: ConcurrentEffect, M[*[_], _], A: JobDecoder](
 }
 
 object Fs2StreamJobFactory {
-  def autoAcking[F[_]: ConcurrentEffect, A: JobDecoder](messages: Queue[F, A]): AutoAckingQueueJobFactory[F, A] =
+  def autoAcking[F[_]: MonadError[*[_], Throwable]: UnsafeRun, A: JobDecoder](
+      messages: Queue[F, A]
+  ): AutoAckingQueueJobFactory[F, A] =
     new AutoAckingQueueJobFactory[F, A](messages)
 
-  def acking[F[_]: ConcurrentEffect, A: JobDecoder](
+  def acking[F[_]: Concurrent: UnsafeRun, A: JobDecoder](
       messages: Queue[F, AckableMessage[F, A]]
   ): AckingQueueJobFactory[F, AckableMessage, A] =
     new AckingQueueJobFactory[F, AckableMessage, A](messages, AckableMessage[F, A])
 
-  def ackingResource[F[_]: ConcurrentEffect, A: JobDecoder](
+  def ackingResource[F[_]: Concurrent: Sync: UnsafeRun, A: JobDecoder](
       messages: Queue[F, Resource[F, A]]
   ): AckingQueueJobFactory[F, Resource, A] =
     new AckingQueueJobFactory[F, Resource, A](messages, messageConverterResource)
 
-  private def messageConverterResource[F[_]: Sync, A](message: A, acker: MessageAcker[F, A]): Resource[F, A] =
+  private def messageConverterResource[F[_]: Sync, A](message: A, acker: MessageAcker[F]): Resource[F, A] =
     Resource.applyCase[F, A] {
       Sync[F].delay {
-        val cleanup: ExitCase[Throwable] => Either[Throwable, Unit] = {
-          case ExitCase.Completed        => ().asRight
-          case ExitCase.Canceled         => (new CancellationException).asLeft
-          case ExitCase.Error(exception) => exception.asLeft
+        val cleanup: ExitCase => Either[Throwable, Unit] = {
+          case ExitCase.Succeeded          => ().asRight
+          case ExitCase.Canceled           => (new CancellationException).asLeft
+          case ExitCase.Errored(exception) => exception.asLeft
         }
-        (message, exitCase => acker.complete(cleanup(exitCase)))
+        (message, exitCase => acker.complete(cleanup(exitCase)).void)
       }
     }
 }

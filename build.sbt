@@ -5,6 +5,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
   scalaVersion := "2.13.2",
   crossScalaVersions := Seq("2.12.11", scalaVersion.value),
+  bloopAggregateSourceDependencies in Global := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
@@ -33,6 +34,7 @@ lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
       "org.quartz-scheduler" % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "org.typelevel"       %% "cats-effect"                     % Versions.catsEffect,
       "co.fs2"              %% "fs2-io"                          % Versions.fs2,
       "org.scalatest"       %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"   %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
@@ -50,11 +52,11 @@ lazy val extruder = createProject("extruder")
   .settings(
     resolvers += Resolver.bintrayRepo("janstenpickle", "extruder"),
     libraryDependencies ++= Seq(
-      "io.extruder"       %% "extruder-cats-effect" % Versions.extruder,
-      "org.scalatest"     %% "scalatest"            % Versions.scalatest           % Test,
-      "org.scalatestplus" %% "scalacheck-1-14"      % Versions.scalatestScalacheck % Test,
-      "org.scalamock"     %% "scalamock"            % Versions.scalamock           % Test,
-      "ch.qos.logback"     % "logback-classic"      % Versions.logback             % Test,
+      "io.extruder"       %% "extruder-core"   % Versions.extruder,
+      "org.scalatest"     %% "scalatest"       % Versions.scalatest           % Test,
+      "org.scalatestplus" %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
+      "org.scalamock"     %% "scalamock"       % Versions.scalamock           % Test,
+      "ch.qos.logback"     % "logback-classic" % Versions.logback             % Test,
     ),
   )
 
