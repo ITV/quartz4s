@@ -3,7 +3,7 @@ import sbt._
 val commonSettings: Seq[Setting[_]] = Seq(
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
   organization := "com.itv",
-  scalaVersion := "2.13.2",
+  scalaVersion := "2.13.3",
   crossScalaVersions := Seq("2.12.11", scalaVersion.value),
   bloopAggregateSourceDependencies in Global := true,
   credentials ++=
