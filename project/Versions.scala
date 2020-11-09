@@ -9,5 +9,5 @@ object Versions {
   val scalatest           = "3.2.2"
   val scalatestScalacheck = "3.2.2.0"
   val scalamock           = "5.0.0"
-  val testContainers      = "0.38.1"
+  val testContainers      = "0.38.6"
 }
