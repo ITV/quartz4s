@@ -1,5 +1,7 @@
 import sbt._
 
+bloopExportJarClassifiers in Global := Some(Set("sources"))
+
 val commonSettings: Seq[Setting[_]] = Seq(
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
   organization := "com.itv",

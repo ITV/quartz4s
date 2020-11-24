@@ -13,6 +13,7 @@ out
 .metals
 .bloop
 metals.sbt
+.bsp
 
 # MacOS
 .DS_Store
