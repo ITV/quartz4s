@@ -22,11 +22,11 @@ private[scheduler] sealed abstract class IoPublishCallbackJob[F[_], A](implicit
 final class AutoAckCallbackJob[F[_], A](val handleMessage: A => F[Unit])(implicit
     F: ConcurrentEffect[F],
     jobDecoder: JobDecoder[A]
-) extends IoPublishCallbackJob
+) extends IoPublishCallbackJob[F, A]
 
 final class ExplicitAckCallbackJob[F[_], A](emitMessage: A => F[Deferred[F, Either[Throwable, Unit]]])(implicit
     F: ConcurrentEffect[F],
     jobDecoder: JobDecoder[A]
-) extends IoPublishCallbackJob {
+) extends IoPublishCallbackJob[F, A] {
   override def handleMessage: A => F[Unit] = emitMessage(_) >>= (_.get.rethrow)
 }
