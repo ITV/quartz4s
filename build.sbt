@@ -3,10 +3,9 @@ import sbt._
 bloopExportJarClassifiers in Global := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
   organization := "com.itv",
-  scalaVersion := "2.13.2",
-  crossScalaVersions := Seq("2.12.11", scalaVersion.value),
+  scalaVersion := "3.0.0-M1",
+  crossScalaVersions := Seq(scalaVersion.value, "2.13.4", "2.12.11"),
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
@@ -17,7 +16,10 @@ val commonSettings: Seq[Setting[_]] = Seq(
     else
       Some("Artifactory Realm" at artifactory + ";build.timestamp=" + new java.util.Date().getTime)
   },
-)
+) /*++ {
+  if (isDotty.value) Nil
+  else Seq(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full))
+}*/
 
 def createProject(projectName: String): Project =
   Project(projectName, file(projectName))
@@ -44,7 +46,7 @@ lazy val core = createProject("core")
       "com.zaxxer"           % "HikariCP"                        % Versions.hikari              % Test,
       "org.flywaydb"         % "flyway-core"                     % Versions.flyway              % Test,
       "ch.qos.logback"       % "logback-classic"                 % Versions.logback             % Test,
-    ),
+    ).map(_.withDottyCompat(scalaVersion.value)),
   )
 
 lazy val extruder = createProject("extruder")
@@ -57,7 +59,7 @@ lazy val extruder = createProject("extruder")
       "org.scalatestplus" %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
       "org.scalamock"     %% "scalamock"       % Versions.scalamock           % Test,
       "ch.qos.logback"     % "logback-classic" % Versions.logback             % Test,
-    ),
+    ).map(_.withDottyCompat(scalaVersion.value)),
   )
 
 lazy val docs = project
