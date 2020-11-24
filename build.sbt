@@ -52,11 +52,11 @@ lazy val extruder = createProject("extruder")
   .settings(
     resolvers += Resolver.bintrayRepo("janstenpickle", "extruder"),
     libraryDependencies ++= Seq(
-      "io.extruder"       %% "extruder-cats-effect" % Versions.extruder,
-      "org.scalatest"     %% "scalatest"            % Versions.scalatest           % Test,
-      "org.scalatestplus" %% "scalacheck-1-14"      % Versions.scalatestScalacheck % Test,
-      "org.scalamock"     %% "scalamock"            % Versions.scalamock           % Test,
-      "ch.qos.logback"     % "logback-classic"      % Versions.logback             % Test,
+      "io.extruder"       %% "extruder-core"   % Versions.extruder,
+      "org.scalatest"     %% "scalatest"       % Versions.scalatest           % Test,
+      "org.scalatestplus" %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
+      "org.scalamock"     %% "scalamock"       % Versions.scalamock           % Test,
+      "ch.qos.logback"     % "logback-classic" % Versions.logback             % Test,
     ),
   )
 
