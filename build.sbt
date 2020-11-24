@@ -1,7 +1,9 @@
 import sbt._
 
+bloopExportJarClassifiers in Global := Some(Set("sources"))
+
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
   organization := "com.itv",
   scalaVersion := "2.13.2",
   crossScalaVersions := Seq("2.12.11", scalaVersion.value),
@@ -50,11 +52,11 @@ lazy val extruder = createProject("extruder")
   .settings(
     resolvers += Resolver.bintrayRepo("janstenpickle", "extruder"),
     libraryDependencies ++= Seq(
-      "io.extruder"       %% "extruder-cats-effect" % Versions.extruder,
-      "org.scalatest"     %% "scalatest"            % Versions.scalatest           % Test,
-      "org.scalatestplus" %% "scalacheck-1-14"      % Versions.scalatestScalacheck % Test,
-      "org.scalamock"     %% "scalamock"            % Versions.scalamock           % Test,
-      "ch.qos.logback"     % "logback-classic"      % Versions.logback             % Test,
+      "io.extruder"       %% "extruder-core"   % Versions.extruder,
+      "org.scalatest"     %% "scalatest"       % Versions.scalatest           % Test,
+      "org.scalatestplus" %% "scalacheck-1-14" % Versions.scalatestScalacheck % Test,
+      "org.scalamock"     %% "scalamock"       % Versions.scalamock           % Test,
+      "ch.qos.logback"     % "logback-classic" % Versions.logback             % Test,
     ),
   )
 
