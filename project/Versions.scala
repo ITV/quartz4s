@@ -1,6 +1,6 @@
 object Versions {
   val extruder            = "0.11.0"
-  val flyway              = "6.5.7"
+  val flyway              = "7.2.1"
   val fs2                 = "2.4.5"
   val hikari              = "3.4.5"
   val logback             = "1.2.3"
