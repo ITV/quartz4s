@@ -23,12 +23,12 @@ private[scheduler] sealed abstract class IoPublishCallbackJob[F[_], A](dispatche
 final class AutoAckCallbackJob[F[_]: MonadError[*[_], Throwable], A: JobDecoder](
     dispatcher: Dispatcher[F],
     val handleMessage: A => F[Unit]
-) extends IoPublishCallbackJob(dispatcher)
+) extends IoPublishCallbackJob[F, A](dispatcher)
 
 final class ExplicitAckCallbackJob[F[_]: MonadError[*[_], Throwable], A](
     dispatcher: Dispatcher[F],
     emitMessage: A => F[Deferred[F, Either[Throwable, Unit]]]
 )(implicit jobDecoder: JobDecoder[A])
-    extends IoPublishCallbackJob(dispatcher) {
+    extends IoPublishCallbackJob[F, A](dispatcher) {
   override def handleMessage: A => F[Unit] = emitMessage(_) >>= (_.get.rethrow)
 }

@@ -47,38 +47,40 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
 
   behavior of "QuartzTaskScheduler"
 
+  def schedulerResource(
+      messageQueue: Queue[IO, ParentTestJob]
+  ): Resource[IO, QuartzTaskScheduler[IO, ParentTestJob]] =
+    Dispatcher[IO].map { dispatcher =>
+      val jobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](dispatcher, messageQueue)
+      QuartzTaskScheduler[IO, ParentTestJob](quartzProperties, jobFactory)
+    }
+
   it should "schedule jobs to run every second" in {
     val elementCount = 6
     val userJob      = UserJob("user-id-123")
 
-    val messages = (Queue.unbounded[IO, ParentTestJob] >>= { messageQueue =>
-      Dispatcher[IO]
-        .map(dispatcher => Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](dispatcher, messageQueue))
-        .flatMap(jobFactory => QuartzTaskScheduler[IO, ParentTestJob](quartzProperties, jobFactory))
-        .use { scheduler =>
+    val result = Queue.unbounded[IO, ParentTestJob] >>= { messageQueue =>
+      schedulerResource(messageQueue).use { scheduler =>
+        scheduler
+          .scheduleJob(
+            JobKey.jobKey("child-object-job"),
+            ChildObjectJob,
+            TriggerKey.triggerKey("cron-test-trigger"),
+            CronScheduledJob(new CronExpression("* * * ? * *"))
+          )
+          .flatTap(runTime => IO(println(s"Next cron job scheduled for $runTime"))) *>
           scheduler
             .scheduleJob(
-              JobKey.jobKey("child-object-job"),
-              ChildObjectJob,
-              TriggerKey.triggerKey("cron-test-trigger"),
-              CronScheduledJob(new CronExpression("* * * ? * *"))
+              JobKey.jobKey("single-user-job"),
+              userJob,
+              TriggerKey.triggerKey("scheduled-single-test-trigger"),
+              JobScheduledAt(Instant.now.plusSeconds(2))
             )
-            .flatTap(runTime => IO(println(s"Next cron job scheduled for $runTime"))) *>
-            scheduler
-              .scheduleJob(
-                JobKey.jobKey("single-user-job"),
-                userJob,
-                TriggerKey.triggerKey("scheduled-single-test-trigger"),
-                JobScheduledAt(Instant.now.plusSeconds(2))
-              )
-              .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-            messageQueue.dequeue
-              .take(elementCount)
-              .compile
-              .toList
-        }
-    }).unsafeRunTimed(10.seconds)
-      .getOrElse(fail("Operation timed out completing"))
+            .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
+          messageQueue.dequeue.take(elementCount).compile.toList
+      }
+    }
+    val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
 
     val expectedMessages: List[ParentTestJob] =
       List.fill[ParentTestJob](elementCount - 1)(ChildObjectJob) :+ userJob
