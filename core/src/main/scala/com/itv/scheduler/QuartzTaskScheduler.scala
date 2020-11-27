@@ -6,14 +6,13 @@ import java.util.Date
 import cats.effect._
 import cats.implicits._
 import cats.Apply
+import com.itv.scheduler.QuartzOps._
 import org.quartz.CronScheduleBuilder._
 import org.quartz.SimpleScheduleBuilder._
 import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
-
-import scala.collection.JavaConverters._
 
 trait TaskScheduler[F[_], J] {
   def scheduleJob(
@@ -45,7 +44,7 @@ class QuartzTaskScheduler[F[_], J](
       val jobData: JobData = jobDataEncoder(job)
       val jobDetail = newJob(classOf[PublishCallbackJob])
         .withIdentity(jobKey)
-        .usingJobData(new JobDataMap(jobData.dataMap.asJava))
+        .usingJobData(jobData.toJobDataMap)
         .requestRecovery()
         .storeDurably()
         .build
@@ -72,7 +71,7 @@ class QuartzTaskScheduler[F[_], J](
   override def deleteJob(jobKey: JobKey): F[Unit] =
     blocker.delay {
       scheduler.deleteJob(jobKey)
-    }
+    }.void
 
   override def pauseTrigger(triggerKey: TriggerKey): F[Unit] =
     blocker.delay {

@@ -10,7 +10,7 @@ trait JobDecoderImplicits extends QuartzOps {
   implicit def deriveDecoder[A](implicit dec: Decoder[DecodeDefault, Sett, A, DecodeData]): JobDecoder[A] =
     (jobExecutionContext: JobExecutionContext) => {
       Either
-        .catchNonFatal(jobExecutionContext.jobDataMap)
+        .catchNonFatal(jobExecutionContext.getJobDetail.getJobDataMap.toMap)
         .flatMap(decode[A](_).leftMap(implicitly[ValidationErrorsToThrowable].convertErrors))
     }
 }

@@ -80,7 +80,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          messageQueue.dequeue.take(elementCount).compile.toList
+          messageQueue.dequeue.take(elementCount.toLong).compile.toList
       }
     }
     val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
