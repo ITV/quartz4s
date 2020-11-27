@@ -76,3 +76,5 @@ lazy val docs = project
     ),
   )
   .dependsOn(core, extruder)
+
+addCommandAlias("buildFs2Quartz", ";clean;+test;mdoc")
