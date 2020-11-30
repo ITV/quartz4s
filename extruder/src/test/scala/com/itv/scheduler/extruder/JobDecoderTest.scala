@@ -1,7 +1,7 @@
 package com.itv.scheduler.extruder
 
 import com.itv.scheduler._
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.QuartzOps._
 import org.quartz.{JobDetail, JobExecutionContext}
 import org.scalatest.flatspec.AnyFlatSpec

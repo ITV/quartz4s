@@ -2,7 +2,7 @@ package com.itv.scheduler
 
 import cats.effect._
 import cats.effect.concurrent.Deferred
-import cats.implicits._
+import cats.syntax.all._
 import org.quartz._
 
 import scala.util.Either

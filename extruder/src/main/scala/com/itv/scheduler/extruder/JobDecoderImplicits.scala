@@ -1,6 +1,6 @@
 package com.itv.scheduler.extruder
 
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.{JobDecoder, QuartzOps}
 import extruder.core._
 import extruder.map._

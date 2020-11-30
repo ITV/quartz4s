@@ -5,7 +5,7 @@ import java.util.Properties
 import java.util.concurrent.Executors
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import com.dimafeng.testcontainers._
 import fs2.concurrent.Queue
 import org.flywaydb.core.Flyway

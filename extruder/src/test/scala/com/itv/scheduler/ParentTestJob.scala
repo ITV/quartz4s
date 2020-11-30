@@ -1,6 +1,5 @@
 package com.itv.scheduler
 
-import cats.implicits._
 import com.itv.scheduler.extruder.implicits._
 import _root_.extruder.map._
 

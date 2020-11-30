@@ -5,8 +5,9 @@ bloopExportJarClassifiers in Global := Some(Set("sources"))
 val commonSettings: Seq[Setting[_]] = Seq(
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
   organization := "com.itv",
-  scalaVersion := "2.13.2",
-  crossScalaVersions := Seq("2.12.11", scalaVersion.value),
+  scalaVersion := "2.13.3",
+  crossScalaVersions := Seq("2.12.12", scalaVersion.value),
+  bloopAggregateSourceDependencies in Global := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
@@ -35,6 +36,7 @@ lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
       "org.quartz-scheduler" % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "org.typelevel"       %% "cats-effect"                     % Versions.catsEffect,
       "co.fs2"              %% "fs2-io"                          % Versions.fs2,
       "org.scalatest"       %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"   %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,

@@ -1,6 +1,6 @@
 package com.itv.scheduler
 
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.QuartzOps._
 import org.quartz.JobExecutionContext
 
