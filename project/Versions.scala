@@ -9,6 +9,6 @@ object Versions {
   val quartz              = "2.3.2"
   val scalatest           = "3.2.3"
   val scalatestScalacheck = "3.2.2.0"
-  val scalamock           = "5.0.0"
+  val scalamock           = "5.1.0"
   val testContainers      = "0.38.7"
 }
