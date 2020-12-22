@@ -1,5 +1,7 @@
 import sbt._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 scalaVersion in ThisBuild := "2.13.4"
 
 crossScalaVersions in ThisBuild := Seq(scalaVersion.value, "2.12.12")
