@@ -1,6 +1,5 @@
 package com.itv.scheduler
 
-import cats.implicits._
 import cats.Contravariant
 
 final case class JobData(dataMap: Map[String, String])

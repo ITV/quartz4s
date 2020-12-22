@@ -5,7 +5,7 @@ import cats.effect._
 import cats.effect.kernel.Deferred
 import cats.effect.kernel.Resource.ExitCase
 import cats.effect.std.Dispatcher
-import cats.implicits._
+import cats.syntax.all._
 import fs2.concurrent.Queue
 import org.quartz.{Job, Scheduler}
 import org.quartz.simpl.PropertySettingJobFactory

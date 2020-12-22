@@ -1,8 +1,6 @@
 package com.itv.scheduler
 
-import cats.implicits._
 import com.itv.scheduler.extruder.implicits._
-import _root_.extruder.core._
 import _root_.extruder.map._
 
 sealed trait ParentTestJob

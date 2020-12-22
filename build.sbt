@@ -1,12 +1,17 @@
 import sbt._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+scalaVersion in ThisBuild := "2.13.4"
+
+crossScalaVersions in ThisBuild := Seq(scalaVersion.value, "2.12.12")
+releaseCrossBuild := true
+
 bloopExportJarClassifiers in Global := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full),
   organization := "com.itv",
-  scalaVersion := "2.13.3",
-  crossScalaVersions := Seq("2.12.11", scalaVersion.value),
   bloopAggregateSourceDependencies in Global := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
@@ -78,3 +83,5 @@ lazy val docs = project
     ),
   )
   .dependsOn(core, extruder)
+
+addCommandAlias("buildFs2Quartz", ";clean;+test;mdoc")

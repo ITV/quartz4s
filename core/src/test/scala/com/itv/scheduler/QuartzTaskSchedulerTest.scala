@@ -6,7 +6,7 @@ import java.util.Properties
 import cats.effect._
 import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
-import cats.implicits._
+import cats.syntax.all._
 import com.dimafeng.testcontainers._
 import fs2.concurrent.Queue
 import org.flywaydb.core.Flyway
@@ -77,7 +77,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          messageQueue.dequeue.take(elementCount).compile.toList
+          messageQueue.dequeue.take(elementCount.toLong).compile.toList
       }
     }
     val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))

@@ -5,8 +5,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-import scala.collection.JavaConverters._
-
 class Fs2QuartzConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   behavior of "Fs2QuartzConfig"
 
@@ -20,36 +18,35 @@ class Fs2QuartzConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDrive
       sizedStringGen,
       sizedStringGen,
       sizedStringGen,
-    ) {
-      case (threadCount, maxConnections, jdbcUrl, username, password) =>
-        val quartzConfig = Fs2QuartzConfig(
-          JobStoreConfig(
-            driverDelegateClass = classOf[org.quartz.impl.jdbcjobstore.PostgreSQLDelegate],
-          ),
-          ThreadPoolConfig(threadCount),
-          DataSourceConfig(
-            driverClass = classOf[org.postgresql.Driver],
-            jdbcUrl = jdbcUrl,
-            username = username,
-            password = password,
-            maxConnections = maxConnections,
-          )
+    ) { case (threadCount, maxConnections, jdbcUrl, username, password) =>
+      val quartzConfig = Fs2QuartzConfig(
+        JobStoreConfig(
+          driverDelegateClass = classOf[org.quartz.impl.jdbcjobstore.PostgreSQLDelegate],
+        ),
+        ThreadPoolConfig(threadCount),
+        DataSourceConfig(
+          driverClass = classOf[org.postgresql.Driver],
+          jdbcUrl = jdbcUrl,
+          username = username,
+          password = password,
+          maxConnections = maxConnections,
         )
+      )
 
-        val expectedProperties: Map[String, String] = Map(
-          "org.quartz.jobStore.isClustered"         -> "true",
-          "org.quartz.jobStore.driverDelegateClass" -> "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate",
-          "org.quartz.threadPool.threadCount"       -> threadCount.toString,
-          "org.quartz.jobStore.class"               -> "org.quartz.impl.jdbcjobstore.JobStoreTX",
-          "org.quartz.jobStore.dataSource"          -> "ds",
-          "org.quartz.dataSource.ds.provider"       -> "hikaricp",
-          "org.quartz.dataSource.ds.driver"         -> "org.postgresql.Driver",
-          "org.quartz.dataSource.ds.URL"            -> jdbcUrl,
-          "org.quartz.dataSource.ds.user"           -> username,
-          "org.quartz.dataSource.ds.password"       -> password,
-          "org.quartz.dataSource.ds.maxConnections" -> maxConnections.toString,
-        )
-        quartzConfig.toQuartzProperties.properties.asScala.toMap should contain theSameElementsAs expectedProperties
+      val expectedProperties: Map[String, String] = Map(
+        "org.quartz.jobStore.isClustered"         -> "true",
+        "org.quartz.jobStore.driverDelegateClass" -> "org.quartz.impl.jdbcjobstore.PostgreSQLDelegate",
+        "org.quartz.threadPool.threadCount"       -> threadCount.toString,
+        "org.quartz.jobStore.class"               -> "org.quartz.impl.jdbcjobstore.JobStoreTX",
+        "org.quartz.jobStore.dataSource"          -> "ds",
+        "org.quartz.dataSource.ds.provider"       -> "hikaricp",
+        "org.quartz.dataSource.ds.driver"         -> "org.postgresql.Driver",
+        "org.quartz.dataSource.ds.URL"            -> jdbcUrl,
+        "org.quartz.dataSource.ds.user"           -> username,
+        "org.quartz.dataSource.ds.password"       -> password,
+        "org.quartz.dataSource.ds.maxConnections" -> maxConnections.toString,
+      )
+      quartzConfig.toPropertiesMap should contain theSameElementsAs expectedProperties
     }
   }
 }
