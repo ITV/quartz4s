@@ -3,7 +3,7 @@ import sbt._
 bloopExportJarClassifiers in Global := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full),
   organization := "com.itv",
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.12", scalaVersion.value),
