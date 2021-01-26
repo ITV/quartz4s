@@ -6,6 +6,7 @@ import java.util.Date
 import cats.effect._
 import cats.syntax.all._
 import cats.Apply
+import cats.data.Kleisli
 import com.itv.scheduler.QuartzOps._
 import org.quartz.CronScheduleBuilder._
 import org.quartz.SimpleScheduleBuilder._
@@ -33,9 +34,23 @@ trait TaskScheduler[F[_], J] {
   def pauseTrigger(triggerKey: TriggerKey): F[Unit]
 }
 
+object TaskScheduler {
+  implicit def deriveKleisli[F[_], J, A](taskScheduler: TaskScheduler[F, J]): TaskScheduler[Kleisli[F, A, *], J] =
+    new TaskScheduler[Kleisli[F, A, *], J] {
+      def createJob(jobKey: JobKey, job: J): Kleisli[F, A, Unit] =
+        Kleisli.liftK(taskScheduler.createJob(jobKey, job))
+      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): Kleisli[F, A, Option[Instant]] =
+        Kleisli.liftK(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
+      def deleteJob(jobKey: JobKey): Kleisli[F, A, Unit] =
+        Kleisli.liftK(taskScheduler.deleteJob(jobKey))
+      def pauseTrigger(triggerKey: TriggerKey): Kleisli[F, A, Unit] =
+        Kleisli.liftK(taskScheduler.pauseTrigger(triggerKey))
+    }
+}
+
 class QuartzTaskScheduler[F[_], J](
-    blocker: Blocker,
-    scheduler: Scheduler
+    val blocker: Blocker,
+    val scheduler: Scheduler
 )(implicit F: Sync[F], CS: ContextShift[F], jobDataEncoder: JobDataEncoder[J])
     extends TaskScheduler[F, J] {
 
@@ -106,7 +121,7 @@ object QuartzTaskScheduler {
       callbackJobFactory: CallbackJobFactory,
   )(implicit F: ConcurrentEffect[F]): F[Scheduler] =
     F.delay {
-      val sf                   = new StdSchedulerFactory(quartzProps.properties)
+      val sf = new StdSchedulerFactory(quartzProps.properties)
       val scheduler: Scheduler = sf.getScheduler
       scheduler.setJobFactory(callbackJobFactory)
       scheduler
