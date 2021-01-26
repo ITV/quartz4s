@@ -5,8 +5,9 @@ import java.util.Date
 
 import cats.effect._
 import cats.syntax.all._
-import cats.{Applicative, Apply, Functor, Monoid}
+import cats.{Applicative, Apply, Functor, Monoid, ~>}
 import cats.data.{EitherT, Kleisli, OptionT, WriterT}
+import cats.tagless.FunctorK
 import com.itv.scheduler.QuartzOps._
 import org.quartz.CronScheduleBuilder._
 import org.quartz.SimpleScheduleBuilder._
@@ -35,53 +36,32 @@ trait TaskScheduler[F[_], J] {
 }
 
 object TaskScheduler {
-  implicit def deriveKleisli[F[_], J, A](taskScheduler: TaskScheduler[F, J]): TaskScheduler[Kleisli[F, A, *], J] =
-    new TaskScheduler[Kleisli[F, A, *], J] {
-      def createJob(jobKey: JobKey, job: J): Kleisli[F, A, Unit] =
-        Kleisli.liftK(taskScheduler.createJob(jobKey, job))
-      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): Kleisli[F, A, Option[Instant]] =
-        Kleisli.liftK(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
-      def deleteJob(jobKey: JobKey): Kleisli[F, A, Unit] =
-        Kleisli.liftK(taskScheduler.deleteJob(jobKey))
-      def pauseTrigger(triggerKey: TriggerKey): Kleisli[F, A, Unit] =
-        Kleisli.liftK(taskScheduler.pauseTrigger(triggerKey))
-    }
+  implicit def functorK[J]: FunctorK[TaskScheduler[*[_], J]] = new FunctorK[TaskScheduler[*[_], J]] {
+    def mapK[F[_], G[_]](af: TaskScheduler[F, J])(fk: F ~> G): TaskScheduler[G, J] =
+      new TaskScheduler[G, J] {
+        def createJob(jobKey: JobKey, job: J): G[Unit] = fk(af.createJob(jobKey, job))
+        def scheduleTrigger(
+            jobKey: JobKey,
+            triggerKey: TriggerKey,
+            jobTimeSchedule: JobTimeSchedule
+        ): G[Option[Instant]]                             = fk(af.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
+        def deleteJob(jobKey: JobKey): G[Unit]            = fk(af.deleteJob(jobKey))
+        def pauseTrigger(triggerKey: TriggerKey): G[Unit] = fk(af.pauseTrigger(triggerKey))
+      }
+  }
 
+  implicit def deriveKleisli[F[_], A, J](taskScheduler: TaskScheduler[F, J]): TaskScheduler[Kleisli[F, A, *], J] =
+    functorK[J].mapK(taskScheduler)(Kleisli.liftK)
   implicit def deriveOptionT[F[_]: Functor, J](taskScheduler: TaskScheduler[F, J]): TaskScheduler[OptionT[F, *], J] =
-    new TaskScheduler[OptionT[F, *], J] {
-      def createJob(jobKey: JobKey, job: J): OptionT[F, Unit] =
-        OptionT.liftK.apply(taskScheduler.createJob(jobKey, job))
-      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): OptionT[F, Option[Instant]] =
-        OptionT.liftK.apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
-      def deleteJob(jobKey: JobKey): OptionT[F, Unit] =
-        OptionT.liftK.apply(taskScheduler.deleteJob(jobKey))
-      def pauseTrigger(triggerKey: TriggerKey): OptionT[F, Unit] =
-        OptionT.liftK.apply(taskScheduler.pauseTrigger(triggerKey))
-    }
-
-  implicit def deriveEitherT[F[_]: Functor, J, E](taskScheduler: TaskScheduler[F, J]): TaskScheduler[EitherT[F, E, *], J] =
-    new TaskScheduler[EitherT[F, E, *], J] {
-      def createJob(jobKey: JobKey, job: J): EitherT[F, E, Unit] =
-        EitherT.liftK[F, E].apply(taskScheduler.createJob(jobKey, job))
-      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): EitherT[F, E, Option[Instant]] =
-        EitherT.liftK[F, E].apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
-      def deleteJob(jobKey: JobKey): EitherT[F, E, Unit] =
-        EitherT.liftK[F, E].apply(taskScheduler.deleteJob(jobKey))
-      def pauseTrigger(triggerKey: TriggerKey): EitherT[F, E, Unit] =
-        EitherT.liftK[F, E].apply(taskScheduler.pauseTrigger(triggerKey))
-    }
-
-  implicit def deriveWriterT[F[_]: Applicative, J, L: Monoid](taskScheduler: TaskScheduler[F, J]): TaskScheduler[WriterT[F, L, *], J] =
-    new TaskScheduler[WriterT[F, L, *], J] {
-      def createJob(jobKey: JobKey, job: J): WriterT[F, L, Unit] =
-        WriterT.liftK[F, L].apply(taskScheduler.createJob(jobKey, job))
-      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): WriterT[F, L, Option[Instant]] =
-        WriterT.liftK[F, L].apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
-      def deleteJob(jobKey: JobKey): WriterT[F, L, Unit] =
-        WriterT.liftK[F, L].apply(taskScheduler.deleteJob(jobKey))
-      def pauseTrigger(triggerKey: TriggerKey): WriterT[F, L, Unit] =
-        WriterT.liftK[F, L].apply(taskScheduler.pauseTrigger(triggerKey))
-    }
+    functorK[J].mapK(taskScheduler)(OptionT.liftK)
+  implicit def deriveEitherT[F[_]: Functor, J, E](
+      taskScheduler: TaskScheduler[F, J]
+  ): TaskScheduler[EitherT[F, E, *], J] =
+    functorK[J].mapK(taskScheduler)(EitherT.liftK)
+  implicit def deriveWriterT[F[_]: Applicative, J, L: Monoid](
+      taskScheduler: TaskScheduler[F, J]
+  ): TaskScheduler[WriterT[F, L, *], J] =
+    functorK[J].mapK(taskScheduler)(WriterT.liftK)
 }
 
 class QuartzTaskScheduler[F[_], J](
@@ -157,7 +137,7 @@ object QuartzTaskScheduler {
       callbackJobFactory: CallbackJobFactory,
   )(implicit F: ConcurrentEffect[F]): F[Scheduler] =
     F.delay {
-      val sf = new StdSchedulerFactory(quartzProps.properties)
+      val sf                   = new StdSchedulerFactory(quartzProps.properties)
       val scheduler: Scheduler = sf.getScheduler
       scheduler.setJobFactory(callbackJobFactory)
       scheduler

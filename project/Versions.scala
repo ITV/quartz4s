@@ -11,4 +11,5 @@ object Versions {
   val scalatestScalacheck = "3.2.2.0"
   val scalamock           = "5.0.0"
   val testContainers      = "0.38.7"
+  val catsTagless         = "0.12"
 }
