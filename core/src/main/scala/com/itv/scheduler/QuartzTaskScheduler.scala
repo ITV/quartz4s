@@ -5,8 +5,8 @@ import java.util.Date
 
 import cats.effect._
 import cats.syntax.all._
-import cats.Apply
-import cats.data.Kleisli
+import cats.{Applicative, Apply, Functor, Monoid}
+import cats.data.{EitherT, Kleisli, OptionT, WriterT}
 import com.itv.scheduler.QuartzOps._
 import org.quartz.CronScheduleBuilder._
 import org.quartz.SimpleScheduleBuilder._
@@ -45,6 +45,42 @@ object TaskScheduler {
         Kleisli.liftK(taskScheduler.deleteJob(jobKey))
       def pauseTrigger(triggerKey: TriggerKey): Kleisli[F, A, Unit] =
         Kleisli.liftK(taskScheduler.pauseTrigger(triggerKey))
+    }
+
+  implicit def deriveOptionT[F[_]: Functor, J](taskScheduler: TaskScheduler[F, J]): TaskScheduler[OptionT[F, *], J] =
+    new TaskScheduler[OptionT[F, *], J] {
+      def createJob(jobKey: JobKey, job: J): OptionT[F, Unit] =
+        OptionT.liftK.apply(taskScheduler.createJob(jobKey, job))
+      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): OptionT[F, Option[Instant]] =
+        OptionT.liftK.apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
+      def deleteJob(jobKey: JobKey): OptionT[F, Unit] =
+        OptionT.liftK.apply(taskScheduler.deleteJob(jobKey))
+      def pauseTrigger(triggerKey: TriggerKey): OptionT[F, Unit] =
+        OptionT.liftK.apply(taskScheduler.pauseTrigger(triggerKey))
+    }
+
+  implicit def deriveEitherT[F[_]: Functor, J, E](taskScheduler: TaskScheduler[F, J]): TaskScheduler[EitherT[F, E, *], J] =
+    new TaskScheduler[EitherT[F, E, *], J] {
+      def createJob(jobKey: JobKey, job: J): EitherT[F, E, Unit] =
+        EitherT.liftK[F, E].apply(taskScheduler.createJob(jobKey, job))
+      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): EitherT[F, E, Option[Instant]] =
+        EitherT.liftK[F, E].apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
+      def deleteJob(jobKey: JobKey): EitherT[F, E, Unit] =
+        EitherT.liftK[F, E].apply(taskScheduler.deleteJob(jobKey))
+      def pauseTrigger(triggerKey: TriggerKey): EitherT[F, E, Unit] =
+        EitherT.liftK[F, E].apply(taskScheduler.pauseTrigger(triggerKey))
+    }
+
+  implicit def deriveWriterT[F[_]: Applicative, J, L: Monoid](taskScheduler: TaskScheduler[F, J]): TaskScheduler[WriterT[F, L, *], J] =
+    new TaskScheduler[WriterT[F, L, *], J] {
+      def createJob(jobKey: JobKey, job: J): WriterT[F, L, Unit] =
+        WriterT.liftK[F, L].apply(taskScheduler.createJob(jobKey, job))
+      def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): WriterT[F, L, Option[Instant]] =
+        WriterT.liftK[F, L].apply(taskScheduler.scheduleTrigger(jobKey, triggerKey, jobTimeSchedule))
+      def deleteJob(jobKey: JobKey): WriterT[F, L, Unit] =
+        WriterT.liftK[F, L].apply(taskScheduler.deleteJob(jobKey))
+      def pauseTrigger(triggerKey: TriggerKey): WriterT[F, L, Unit] =
+        WriterT.liftK[F, L].apply(taskScheduler.pauseTrigger(triggerKey))
     }
 }
 
