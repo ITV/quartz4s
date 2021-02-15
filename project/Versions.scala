@@ -3,7 +3,7 @@ object Versions {
   val extruder            = "0.11.0"
   val flyway              = "7.3.0"
   val fs2                 = "2.4.6"
-  val hikari              = "3.4.5"
+  val hikari              = "4.0.2"
   val logback             = "1.2.3"
   val postgresql          = "42.2.18"
   val quartz              = "2.3.2"
