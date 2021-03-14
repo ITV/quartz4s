@@ -2,17 +2,15 @@ import sbt._
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-scalaVersion in ThisBuild := "2.13.4"
+scalaVersion in ThisBuild := "3.0.0-RC1"
 
-crossScalaVersions in ThisBuild := Seq(scalaVersion.value, "2.12.12")
+crossScalaVersions in ThisBuild ++= Seq("2.12.13", "2.13.5")
 releaseCrossBuild := true
 
 bloopExportJarClassifiers in Global := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
-  scalaVersion := "3.0.0-M1",
-  crossScalaVersions := Seq(scalaVersion.value, "2.13.4", "2.12.11"),
   bloopAggregateSourceDependencies in Global := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
@@ -26,7 +24,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   },
 ) /*++ {
   if (isDotty.value) Nil
-  else Seq(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full))
+  else Seq(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full))
 }*/
 
 def createProject(projectName: String): Project =
