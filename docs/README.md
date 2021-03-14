@@ -32,7 +32,6 @@ putting data into the quartz `JobDataMap`.
 ```scala mdoc
 import com.itv.scheduler.{JobDataEncoder, JobDecoder}
 import com.itv.scheduler.extruder.implicits._
-import extruder.core._
 import extruder.map._
 
 sealed trait ParentJob

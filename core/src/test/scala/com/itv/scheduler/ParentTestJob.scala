@@ -1,6 +1,6 @@
 package com.itv.scheduler
 
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.QuartzOps._
 import org.quartz.JobExecutionContext
 
@@ -15,7 +15,7 @@ object ParentTestJob {
   }
   implicit val jobDecoder: JobDecoder[ParentTestJob] = new JobDecoder[ParentTestJob] {
     override def apply(jobExecutionContext: JobExecutionContext): Either[Throwable, ParentTestJob] =
-      Either.catchNonFatal(jobExecutionContext.jobDataMap).flatMap { jobDataMap =>
+      Either.catchNonFatal(jobExecutionContext.getJobDetail.getJobDataMap.toMap).flatMap { jobDataMap =>
         findField(jobDataMap, "type").flatMap {
           case "child" => Right(ChildObjectJob)
           case "user"  => findField(jobDataMap, "id").map(UserJob)

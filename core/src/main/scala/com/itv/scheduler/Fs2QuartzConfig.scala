@@ -42,9 +42,9 @@ final case class Fs2QuartzConfig(
     threadPool: ThreadPoolConfig,
     dataSource: DataSourceConfig,
 ) {
-  def toQuartzProperties: QuartzProperties = {
+  private[scheduler] def toPropertiesMap: Map[String, String] = {
     val dataSourcePropPrefix = s"$PROP_DATASOURCE_PREFIX.${dataSource.dataSourceName}"
-    val propMap: Map[String, String] = Map(
+    Map(
       PROP_JOB_STORE_CLASS                          -> jobStore.jobStoreClass.getName,
       s"$PROP_JOB_STORE_PREFIX.driverDelegateClass" -> jobStore.driverDelegateClass.getName,
       s"$PROP_JOB_STORE_PREFIX.isClustered"         -> jobStore.isClustered.toString,
@@ -57,7 +57,11 @@ final case class Fs2QuartzConfig(
       s"$dataSourcePropPrefix.$DB_PASSWORD"         -> dataSource.password,
       s"$dataSourcePropPrefix.$DB_MAX_CONNECTIONS"  -> dataSource.maxConnections.toString,
     )
-    val props = new Properties()
+  }
+
+  def toQuartzProperties: QuartzProperties = {
+    val propMap = toPropertiesMap
+    val props   = new Properties()
     propMap.foreach { case (k, v) => props.setProperty(k, v) }
     QuartzProperties(props)
   }

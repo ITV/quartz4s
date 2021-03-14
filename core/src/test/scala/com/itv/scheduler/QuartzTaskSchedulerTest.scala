@@ -5,7 +5,7 @@ import java.util.Properties
 import java.util.concurrent.Executors
 
 import cats.effect._
-import cats.implicits._
+import cats.syntax.all._
 import com.dimafeng.testcontainers._
 import fs2.concurrent.Queue
 import org.flywaydb.core.Flyway
@@ -50,17 +50,20 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
 
   behavior of "QuartzTaskScheduler"
 
-  it should "schedule jobs to run every second" in {
-    val blocker           = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-    val messageQueue      = Queue.unbounded[IO, ParentTestJob].unsafeRunSync()
-    val jobFactory        = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue)
-    val schedulerResource = QuartzTaskScheduler[IO, ParentTestJob](blocker, quartzProperties, jobFactory)
+  def schedulerResource(
+      messageQueue: Queue[IO, ParentTestJob]
+  ): Resource[IO, QuartzTaskScheduler[IO, ParentTestJob]] = {
+    val blocker    = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
+    val jobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue)
+    QuartzTaskScheduler[IO, ParentTestJob](blocker, quartzProperties, jobFactory)
+  }
 
+  it should "schedule jobs to run every second" in {
     val elementCount = 6
     val userJob      = UserJob("user-id-123")
 
-    val messages = schedulerResource
-      .use { scheduler =>
+    val result = Queue.unbounded[IO, ParentTestJob] >>= { messageQueue =>
+      schedulerResource(messageQueue).use { scheduler =>
         scheduler
           .scheduleJob(
             JobKey.jobKey("child-object-job"),
@@ -77,10 +80,10 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          messageQueue.dequeue.take(elementCount).compile.toList
+          messageQueue.dequeue.take(elementCount.toLong).compile.toList
       }
-      .unsafeRunTimed(10.seconds)
-      .getOrElse(fail("Operation timed out completing"))
+    }
+    val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
 
     val expectedMessages: List[ParentTestJob] = List.fill[ParentTestJob](elementCount - 1)(ChildObjectJob) :+ userJob
     messages should contain theSameElementsAs expectedMessages

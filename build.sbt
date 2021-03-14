@@ -1,11 +1,19 @@
 import sbt._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
+scalaVersion in ThisBuild := "2.13.4"
+
+crossScalaVersions in ThisBuild := Seq(scalaVersion.value, "2.12.12")
+releaseCrossBuild := true
+
 bloopExportJarClassifiers in Global := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
   scalaVersion := "3.0.0-M1",
   crossScalaVersions := Seq(scalaVersion.value, "2.13.4", "2.12.11"),
+  bloopAggregateSourceDependencies in Global := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
@@ -37,6 +45,7 @@ lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
       "org.quartz-scheduler" % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "org.typelevel"       %% "cats-effect"                     % Versions.catsEffect,
       "co.fs2"              %% "fs2-io"                          % Versions.fs2,
       "org.scalatest"       %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"   %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
@@ -78,3 +87,5 @@ lazy val docs = project
     ),
   )
   .dependsOn(core, extruder)
+
+addCommandAlias("buildFs2Quartz", ";clean;+test;mdoc")
