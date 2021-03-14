@@ -8,7 +8,7 @@ import cats.effect.std.Dispatcher
 import cats.effect.unsafe.implicits.global
 import cats.syntax.all._
 import com.dimafeng.testcontainers._
-import fs2.concurrent.Queue
+import cats.effect.std.Queue
 import org.flywaydb.core.Flyway
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach
@@ -50,7 +50,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
   def schedulerResource(
       messageQueue: Queue[IO, ParentTestJob]
   ): Resource[IO, QuartzTaskScheduler[IO, ParentTestJob]] =
-    Dispatcher[IO].map { dispatcher =>
+    Dispatcher[IO].flatMap { dispatcher =>
       val jobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](dispatcher, messageQueue)
       QuartzTaskScheduler[IO, ParentTestJob](quartzProperties, jobFactory)
     }
@@ -77,7 +77,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          messageQueue.dequeue.take(elementCount.toLong).compile.toList
+          messageQueue.take.replicateA(elementCount)
       }
     }
     val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))

@@ -4,9 +4,8 @@ import cats.MonadError
 import cats.effect._
 import cats.effect.kernel.Deferred
 import cats.effect.kernel.Resource.ExitCase
-import cats.effect.std.Dispatcher
+import cats.effect.std.{Dispatcher, Queue}
 import cats.syntax.all._
-import fs2.concurrent.Queue
 import org.quartz.{Job, Scheduler}
 import org.quartz.simpl.PropertySettingJobFactory
 import org.quartz.spi.TriggerFiredBundle
@@ -31,7 +30,7 @@ class AutoAckingQueueJobFactory[F[_]: MonadError[*[_], Throwable], A: JobDecoder
     dispatcher: Dispatcher[F],
     override val messages: Queue[F, A]
 ) extends MessageQueueJobFactory[F, A] {
-  override def createCallbackJob: AutoAckCallbackJob[F, A] = new AutoAckCallbackJob[F, A](dispatcher, messages.enqueue1)
+  override def createCallbackJob: AutoAckCallbackJob[F, A] = new AutoAckCallbackJob[F, A](dispatcher, messages.offer)
 }
 
 final case class AckableMessage[F[_], A](message: A, acker: MessageAcker[F])
@@ -44,8 +43,7 @@ class AckingQueueJobFactory[F[_]: Concurrent, M[*[_], _], A: JobDecoder](
   override def createCallbackJob: ExplicitAckCallbackJob[F, A] =
     new ExplicitAckCallbackJob[F, A](
       dispatcher,
-      message =>
-        Deferred[F, Either[Throwable, Unit]].flatTap(acker => messages.enqueue1(messageConverter(message, acker)))
+      message => Deferred[F, Either[Throwable, Unit]].flatTap(acker => messages.offer(messageConverter(message, acker)))
     )
 }
 

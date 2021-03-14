@@ -10,7 +10,7 @@ libraryDependencies ++= Seq(
 ```
 
 The project uses a quartz scheduler, and as scheduled messages are generated from Quartz they are
-decoded and put onto an `fs2.concurrent.Queue`.
+decoded and put onto an `cats.effect.std.Queue`.
 
 #### Components for scheduling jobs:
 * a `QuartzTaskScheduler[F[_], A]` which schedules jobs of type `A`
@@ -19,7 +19,7 @@ decoded and put onto an `fs2.concurrent.Queue`.
 #### Components for responding to scheduled messages:
 * a job factory which is triggered by quartz when a scheduled task occurs and creates messages to put on the queue
 * a `JobDecoder[A]` which decodes the incoming message data map into an `A`
-* the decoded message is put onto the provided `fs2.concurrent.Queue`
+* the decoded message is put onto the provided `cats.effect.std.Queue`
 
 
 ## Usage:
@@ -54,7 +54,7 @@ as it has already been marked as successful.
 ```scala mdoc
 import cats.effect._
 import com.itv.scheduler._
-import fs2.concurrent.Queue
+import cats.effect.std.Queue
 import scala.concurrent.ExecutionContext
 
 implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
