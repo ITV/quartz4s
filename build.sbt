@@ -42,7 +42,6 @@ lazy val core = createProject("core")
     libraryDependencies ++= Seq(
       "org.quartz-scheduler" % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"       %% "cats-effect"                     % Versions.catsEffect,
-      "co.fs2"              %% "fs2-io"                          % Versions.fs2,
       "org.scalatest"       %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"   %% "scalacheck-1-14"                 % Versions.scalatestScalacheck % Test,
       "com.dimafeng"        %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
