@@ -15,8 +15,6 @@ import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.impl.matchers.GroupMatcher
 
-import scala.jdk.CollectionConverters.CollectionHasAsScala
-
 trait TaskScheduler[F[_], J] {
   def scheduleJob(
       jobKey: JobKey,
@@ -85,7 +83,7 @@ class QuartzTaskScheduler[F[_], J](
 
   override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
     blocker.delay{
-      scheduler.getJobKeys(matcher).asScala.toList
+      scheduler.getJobKeys(matcher).toList
     }
 }
 
