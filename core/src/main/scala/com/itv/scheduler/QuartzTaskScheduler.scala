@@ -82,7 +82,7 @@ class QuartzTaskScheduler[F[_], J](
     }
 
   override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
-    blocker.delay{
+    blocker.delay {
       scheduler.getJobKeys(matcher).toList
     }
 }
