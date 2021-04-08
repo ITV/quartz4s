@@ -1,3 +1,19 @@
+name: Release
+
+on:
+  push:
+    branches:
+      #      - master
+      - __wibble-non-existent__
+
+jobs:
+  my-job:
+    name: My Job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print a greeting
+        run: echo Skipping Release
+
 #jobs:
 #  build:
 #    name: Publish
