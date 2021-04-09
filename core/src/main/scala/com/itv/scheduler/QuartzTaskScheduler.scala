@@ -13,6 +13,7 @@ import org.quartz.JobBuilder._
 import org.quartz.TriggerBuilder._
 import org.quartz._
 import org.quartz.impl.StdSchedulerFactory
+import org.quartz.impl.matchers.GroupMatcher
 
 trait TaskScheduler[F[_], J] {
   def scheduleJob(
@@ -31,6 +32,8 @@ trait TaskScheduler[F[_], J] {
   def deleteJob(jobKey: JobKey): F[Unit]
 
   def pauseTrigger(triggerKey: TriggerKey): F[Unit]
+
+  def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]]
 }
 
 class QuartzTaskScheduler[F[_], J](
@@ -76,6 +79,11 @@ class QuartzTaskScheduler[F[_], J](
   override def pauseTrigger(triggerKey: TriggerKey): F[Unit] =
     blocker.delay {
       scheduler.pauseTrigger(triggerKey)
+    }
+
+  override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
+    blocker.delay {
+      scheduler.getJobKeys(matcher).toList
     }
 }
 
