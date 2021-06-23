@@ -37,13 +37,12 @@ trait TaskScheduler[F[_], J] {
 }
 
 class QuartzTaskScheduler[F[_], J](
-    blocker: Blocker,
     scheduler: Scheduler
-)(implicit F: Sync[F], CS: ContextShift[F], jobDataEncoder: JobDataEncoder[J])
+)(implicit F: Sync[F], jobDataEncoder: JobDataEncoder[J])
     extends TaskScheduler[F, J] {
 
   override def createJob(jobKey: JobKey, job: J): F[Unit] =
-    blocker.delay {
+    F.blocking {
       val jobData: JobData = jobDataEncoder(job)
       val jobDetail = newJob(classOf[PublishCallbackJob])
         .withIdentity(jobKey)
@@ -59,7 +58,7 @@ class QuartzTaskScheduler[F[_], J](
       triggerKey: TriggerKey,
       jobTimeSchedule: JobTimeSchedule
   ): F[Option[Instant]] =
-    blocker.delay {
+    F.blocking {
       val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
         case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
         case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
@@ -72,39 +71,37 @@ class QuartzTaskScheduler[F[_], J](
     }
 
   override def deleteJob(jobKey: JobKey): F[Unit] =
-    blocker.delay {
+    F.blocking {
       scheduler.deleteJob(jobKey)
     }.void
 
   override def pauseTrigger(triggerKey: TriggerKey): F[Unit] =
-    blocker.delay {
+    F.blocking {
       scheduler.pauseTrigger(triggerKey)
     }
 
   override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
-    blocker.delay {
+    F.blocking {
       scheduler.getJobKeys(matcher).toList
     }
 }
 
 object QuartzTaskScheduler {
-  def apply[F[_]: ContextShift, J: JobDataEncoder](
-      blocker: Blocker,
+  def apply[F[_], J: JobDataEncoder](
       quartzConfig: Fs2QuartzConfig,
       callbackJobFactory: CallbackJobFactory,
-  )(implicit F: ConcurrentEffect[F]): Resource[F, QuartzTaskScheduler[F, J]] =
-    apply(blocker, quartzConfig.toQuartzProperties, callbackJobFactory)
+  )(implicit F: Sync[F]): Resource[F, QuartzTaskScheduler[F, J]] =
+    apply(quartzConfig.toQuartzProperties, callbackJobFactory)
 
-  def apply[F[_]: ContextShift, J: JobDataEncoder](
-      blocker: Blocker,
+  def apply[F[_], J: JobDataEncoder](
       quartzProps: QuartzProperties,
-      callbackJobFactory: CallbackJobFactory,
-  )(implicit F: ConcurrentEffect[F]): Resource[F, QuartzTaskScheduler[F, J]] =
+      callbackJobFactory: CallbackJobFactory
+  )(implicit F: Sync[F]): Resource[F, QuartzTaskScheduler[F, J]] =
     Resource[F, QuartzTaskScheduler[F, J]](
       createScheduler(quartzProps, callbackJobFactory)
         .flatTap(scheduler => F.delay(scheduler.start()))
         .map { scheduler =>
-          val quartzTaskScheduler: QuartzTaskScheduler[F, J] = new QuartzTaskScheduler[F, J](blocker, scheduler)
+          val quartzTaskScheduler: QuartzTaskScheduler[F, J] = new QuartzTaskScheduler[F, J](scheduler)
           (quartzTaskScheduler, F.delay(scheduler.shutdown(true)))
         }
     )
@@ -112,7 +109,7 @@ object QuartzTaskScheduler {
   private def createScheduler[F[_]](
       quartzProps: QuartzProperties,
       callbackJobFactory: CallbackJobFactory,
-  )(implicit F: ConcurrentEffect[F]): F[Scheduler] =
+  )(implicit F: Sync[F]): F[Scheduler] =
     F.delay {
       val sf                   = new StdSchedulerFactory(quartzProps.properties)
       val scheduler: Scheduler = sf.getScheduler

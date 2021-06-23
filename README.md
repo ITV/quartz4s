@@ -4,8 +4,8 @@ Quarts scheduler library using fs2
 ### Import
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "fs2-quartz-core"     % "0.7.0",
-  "com.itv" %% "fs2-quartz-extruder" % "0.7.0"
+  "com.itv" %% "fs2-quartz-core"     % "0.8.3-SNAPSHOT",
+  "com.itv" %% "fs2-quartz-extruder" % "0.8.3-SNAPSHOT"
 )
 ```
 
@@ -32,7 +32,6 @@ putting data into the quartz `JobDataMap`.
 ```scala
 import com.itv.scheduler.{JobDataEncoder, JobDecoder}
 import com.itv.scheduler.extruder.implicits._
-import extruder.core._
 import extruder.map._
 
 sealed trait ParentJob
@@ -55,16 +54,24 @@ as it has already been marked as successful.
 ```scala
 import cats.effect._
 import com.itv.scheduler._
-import fs2.concurrent.Queue
-import scala.concurrent.ExecutionContext
-
-implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-// contextShift: ContextShift[IO] = cats.effect.internals.IOContextShift@738c87ec
+import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-// jobMessageQueue: Queue[IO, ParentJob] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@61313295
+// jobMessageQueue: Queue[IO, ParentJob] = cats.effect.std.Queue$BoundedQueue@5ad1256f
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
-// autoAckJobFactory: AutoAckingQueueJobFactory[IO, ParentJob] = com.itv.scheduler.AutoAckingQueueJobFactory@1663393b
+// autoAckJobFactory: Resource[IO, AutoAckingQueueJobFactory[IO, ParentJob]] = Bind(
+//   source = Bind(
+//     source = Bind(
+//       source = Allocate(
+//         resource = cats.effect.kernel.Resource$$$Lambda$6008/0x00000008026bb840@7ba49f70
+//       ),
+//       fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@4036c2e7
+//     ),
+//     fs = cats.effect.std.Dispatcher$$$Lambda$6011/0x00000008026b9040@3fac7b29
+//   ),
+//   fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@591cd230
+// )
 ```
 
 #### Manually Acked messages
@@ -80,41 +87,65 @@ In both cases, the quartz job is only marked as complete once the `acker.complet
 ```scala
 // each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@b21463
-val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
+// ackableJobResourceMessageQueue: Queue[IO, Resource[IO, ParentJob]] = cats.effect.std.Queue$BoundedQueue@4d452f7c
+val ackingResourceJobFactory: Resource[IO, AckingQueueJobFactory[IO, Resource, ParentJob]] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
-// ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@279c4c65
+// ackingResourceJobFactory: Resource[IO, AckingQueueJobFactory[IO, Resource, ParentJob]] = Bind(
+//   source = Bind(
+//     source = Bind(
+//       source = Allocate(
+//         resource = cats.effect.kernel.Resource$$$Lambda$6008/0x00000008026bb840@3ad78117
+//       ),
+//       fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@5e8d77fe
+//     ),
+//     fs = cats.effect.std.Dispatcher$$$Lambda$6011/0x00000008026b9040@137a0fd0
+//   ),
+//   fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@43560437
+// )
 
 // each message is wrapped as a `AckableMessage` which acks on completion
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = fs2.concurrent.Queue$InPartiallyApplied$$anon$3@4f516799
-val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
+// ackableJobMessageQueue: Queue[IO, AckableMessage[IO, ParentJob]] = cats.effect.std.Queue$BoundedQueue@334fc2f5
+val ackingJobFactory: Resource[IO, AckingQueueJobFactory[IO, AckableMessage, ParentJob]] =
   Fs2StreamJobFactory.acking(ackableJobMessageQueue)
-// ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] = com.itv.scheduler.AckingQueueJobFactory@40f435a9
+// ackingJobFactory: Resource[IO, AckingQueueJobFactory[IO, AckableMessage, ParentJob]] = Bind(
+//   source = Bind(
+//     source = Bind(
+//       source = Allocate(
+//         resource = cats.effect.kernel.Resource$$$Lambda$6008/0x00000008026bb840@48aa9cee
+//       ),
+//       fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@5bfa764
+//     ),
+//     fs = cats.effect.std.Dispatcher$$$Lambda$6011/0x00000008026b9040@1d942373
+//   ),
+//   fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@ae6840f
+// )
 ```
 
 ### Creating a scheduler
 ```scala
-import java.util.concurrent.Executors
 import com.itv.scheduler.extruder.implicits._
 
 val quartzProperties = QuartzProperties(new java.util.Properties())
-// quartzProperties: QuartzProperties = QuartzProperties({})
-val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-// blocker: Blocker = cats.effect.Blocker@40b1d8d6
+// quartzProperties: QuartzProperties = QuartzProperties(properties = {})
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
-  QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, autoAckJobFactory)
-// schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] = Allocate(
-//   Map(
-//     Bind(
-//       Delay(
-//         com.itv.scheduler.QuartzTaskScheduler$$$Lambda$5407/428267345@604d5061
+  autoAckJobFactory.flatMap { jobFactory => 
+    QuartzTaskScheduler[IO, ParentJob](quartzProperties, jobFactory)
+  }
+// schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] = Bind(
+//   source = Bind(
+//     source = Bind(
+//       source = Bind(
+//         source = Allocate(
+//           resource = cats.effect.kernel.Resource$$$Lambda$6008/0x00000008026bb840@7ba49f70
+//         ),
+//         fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@4036c2e7
 //       ),
-//       cats.FlatMap$$Lambda$5409/1722445077@42cf346
+//       fs = cats.effect.std.Dispatcher$$$Lambda$6011/0x00000008026b9040@3fac7b29
 //     ),
-//     scala.Function1$$Lambda$5397/275794287@3958172e,
-//     1
-//   )
+//     fs = cats.effect.kernel.Resource$$Lambda$6010/0x00000008026ba040@591cd230
+//   ),
+//   fs = <function1>
 // )
 ```
 

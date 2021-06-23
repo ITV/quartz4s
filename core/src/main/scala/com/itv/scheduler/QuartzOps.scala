@@ -6,7 +6,7 @@ import scala.jdk.CollectionConverters._
 
 trait QuartzOps {
   implicit class JobDataMapOps(jobDataMap: JobDataMap) {
-    def toMap: Map[String, String] = jobDataMap.asScala.view.mapValues(_.toString).toMap
+    def toMap: Map[String, String] = jobDataMap.asScala.map { case (k, v) => (k, v.toString) }.toMap
   }
 
   implicit class JobDataOps(jobData: JobData) {
