@@ -37,7 +37,6 @@ lazy val core = createProject("core")
     libraryDependencies ++= Seq(
       "org.quartz-scheduler"    % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"          %% "cats-effect"                     % Versions.catsEffect,
-      "co.fs2"                 %% "fs2-io"                          % Versions.fs2,
       "org.scala-lang.modules" %% "scala-collection-compat"         % Versions.collectionCompat,
       "org.scalatest"          %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"      %% "scalacheck-1-15"                 % Versions.scalatestScalacheck % Test,
@@ -69,7 +68,7 @@ lazy val docs = project
   .settings(commonSettings)
   .settings(
     publish / skip := true,
-    mdocOut := baseDirectory.in(ThisBuild).value,
+    mdocOut := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "FS2_QUARTZ_VERSION" -> version.value
     ),

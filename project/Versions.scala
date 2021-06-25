@@ -3,7 +3,6 @@ object Versions {
   val collectionCompat    = "2.4.4"
   val extruder            = "0.11.0"
   val flyway              = "7.10.0"
-  val fs2                 = "3.0.4"
   val hikari              = "3.4.5"
   val logback             = "1.2.3"
   val postgresql          = "42.2.18"
