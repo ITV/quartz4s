@@ -31,4 +31,4 @@ jobs:
          ${{ runner.os }}-${{ github.ref }}-ivy2
 
     - name: Tests
-      run: sbt -J-Xms256m -J-Xmx1G buildFs2Quartz
+      run: sbt -J-Xms256m -J-Xmx1G buildQuartz4s

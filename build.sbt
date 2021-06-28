@@ -23,7 +23,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
 def createProject(projectName: String): Project =
   Project(projectName, file(projectName))
     .settings(commonSettings)
-    .settings(name := s"fs2-quartz-$projectName")
+    .settings(name := s"quartz4s-$projectName")
 
 lazy val root = (project in file("."))
   .aggregate(core, extruder, docs)
@@ -63,14 +63,14 @@ lazy val extruder = createProject("extruder")
   )
 
 lazy val docs = project
-  .in(file("fs2-quartz-docs"))
+  .in(file("quartz4s-docs"))
   .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
     publish / skip := true,
     mdocOut := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
-      "FS2_QUARTZ_VERSION" -> version.value
+      "QUARTZ4S_VERSION" -> version.value
     ),
     releaseProcess := Seq[ReleaseStep](
       ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
@@ -79,4 +79,4 @@ lazy val docs = project
   )
   .dependsOn(core, extruder)
 
-addCommandAlias("buildFs2Quartz", ";clean;+test;mdoc")
+addCommandAlias("buildQuartz4s", ";clean;+test;mdoc")
