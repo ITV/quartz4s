@@ -110,7 +110,6 @@ releaseProcess := Seq[ReleaseStep](
   ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
   ReleaseMdocStateTransformations.commitMdoc,
   tagRelease,
-  // For non cross-build projects, use releaseStepCommand("publishSigned")
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
   setNextVersion,
