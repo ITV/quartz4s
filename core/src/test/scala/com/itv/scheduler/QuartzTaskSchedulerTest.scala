@@ -12,7 +12,6 @@ import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import fs2.Stream
 
 import scala.concurrent.duration._
 
@@ -77,7 +76,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          Stream.fromQueueUnterminated(messageQueue).take(elementCount.toLong).compile.toList
+          messageQueue.take.replicateA(elementCount)
       }
     }
     val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
