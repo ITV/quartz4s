@@ -4,7 +4,6 @@ import cats.Contravariant
 import shapeless._
 import shapeless.labelled.FieldType
 
-import scala.annotation.nowarn
 import scala.reflect.ClassTag
 
 trait JobDataEncoder[A] {
@@ -15,7 +14,6 @@ trait JobDataEncoder[A] {
     })
 }
 
-@nowarn
 object JobDataEncoder extends PrimitiveEncoders {
   implicit val contravariantJobDataEncoder: Contravariant[JobDataEncoder] = new Contravariant[JobDataEncoder] {
     override def contramap[A, B](fa: JobDataEncoder[A])(f: B => A): JobDataEncoder[B] =
@@ -45,7 +43,8 @@ object JobDataEncoder extends PrimitiveEncoders {
       lp: LowPriority,
       neOpt: T <:!< Option[_],
       neEither: T <:!< Either[_, _]
-  ): JobDataEncoder[T] = { (a: T) =>
+  ): JobDataEncoder[T] = (a: T) => {
+    val _ = (lp, neOpt, neEither)
     underlying.value.apply(gen.to(a))
   }
 
@@ -58,7 +57,7 @@ object JobDataEncoder extends PrimitiveEncoders {
   ): DerivedEncoder[T, FieldType[K, V] :: TailRepr] =
     (r: FieldType[K, V] :: TailRepr) => {
       val fieldName = key.value.name
-      encoder.value.apply(r.head).map { case (key, value) => (fieldName :: key, value) } combine
+      encoder.value.apply(r.head).map { case (key, value) => (fieldName :: key, value) } ++
         tailEncoder.value.encode(r.tail)
     }
 
@@ -67,11 +66,13 @@ object JobDataEncoder extends PrimitiveEncoders {
       tag: ClassTag[In],
       lp: LowPriority,
       encoder: Lazy[DerivedEncoder[In, Repr]]
-  ): JobDataEncoder[In] = { (a: In) =>
+  ): JobDataEncoder[In] = (a: In) => {
+    val _ = lp
     encoder.value.encode(gen.to(a)).map { case (key, value) =>
       (tag.runtimeClass.getSimpleName :: key, value)
     }
   }
+
 }
 
 trait PrimitiveEncoders {

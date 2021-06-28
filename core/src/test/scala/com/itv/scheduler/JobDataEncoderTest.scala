@@ -14,7 +14,7 @@ class JobDataEncoderTest extends AnyFlatSpec with Matchers {
 
   it should "encode a case class correctly where there is nesting" in {
     val encoder = JobDataEncoder[JobWithNesting]
-    encoder.toJobData(JobWithNesting("bob", Some(true), UserJob("123"))) shouldBe JobData(
+    encoder.toJobData(JobWithNesting("bob", Some(true), UserJob("123"), None)) shouldBe JobData(
       Map(
         "jobwithnesting.a"            -> "bob",
         "jobwithnesting.b"            -> "true",
@@ -24,5 +24,3 @@ class JobDataEncoderTest extends AnyFlatSpec with Matchers {
     )
   }
 }
-
-final case class JobWithNesting(a: String, b: Option[Boolean], c: ParentTestJob)
