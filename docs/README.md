@@ -54,10 +54,8 @@ as it has already been marked as successful.
 ```scala mdoc
 import cats.effect._
 import com.itv.scheduler._
-import fs2.concurrent.Queue
-import scala.concurrent.ExecutionContext
-
-implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+import cats.effect.std.Queue
+import cats.effect.unsafe.implicits.global
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
 val autoAckJobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
@@ -76,24 +74,24 @@ In both cases, the quartz job is only marked as complete once the `acker.complet
 ```scala mdoc
 // each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-val ackingResourceJobFactory: AckingQueueJobFactory[IO, Resource, ParentJob] =
+val ackingResourceJobFactory: Resource[IO, AckingQueueJobFactory[IO, Resource, ParentJob]] =
   Fs2StreamJobFactory.ackingResource(ackableJobResourceMessageQueue)
 
 // each message is wrapped as a `AckableMessage` which acks on completion
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-val ackingJobFactory: AckingQueueJobFactory[IO, AckableMessage, ParentJob] =
+val ackingJobFactory: Resource[IO, AckingQueueJobFactory[IO, AckableMessage, ParentJob]] =
   Fs2StreamJobFactory.acking(ackableJobMessageQueue)
 ```
 
 ### Creating a scheduler
 ```scala mdoc
-import java.util.concurrent.Executors
 import com.itv.scheduler.extruder.implicits._
 
 val quartzProperties = QuartzProperties(new java.util.Properties())
-val blocker = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
-  QuartzTaskScheduler[IO, ParentJob](blocker, quartzProperties, autoAckJobFactory)
+  autoAckJobFactory.flatMap { jobFactory => 
+    QuartzTaskScheduler[IO, ParentJob](quartzProperties, jobFactory)
+  }
 ```
 
 ### Using the scheduler

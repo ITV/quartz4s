@@ -2,26 +2,23 @@ package com.itv.scheduler
 
 import java.time.Instant
 import java.util.Properties
-import java.util.concurrent.Executors
-
 import cats.effect._
+import cats.effect.std.Queue
+import cats.effect.unsafe.IORuntime
 import cats.syntax.all._
 import com.dimafeng.testcontainers._
-import fs2.concurrent.Queue
 import org.flywaydb.core.Flyway
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestContainer with BeforeAndAfterEach {
   override val container: PostgreSQLContainer = PostgreSQLContainer()
 
-  implicit val timer: Timer[IO]               = IO.timer(ExecutionContext.global)
-  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  implicit val runtime: IORuntime = cats.effect.unsafe.IORuntime.global
 
   lazy val quartzProperties: QuartzProperties = {
     val props = new Properties()
@@ -52,11 +49,10 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
 
   def schedulerResource(
       messageQueue: Queue[IO, ParentTestJob]
-  ): Resource[IO, QuartzTaskScheduler[IO, ParentTestJob]] = {
-    val blocker    = Blocker.liftExecutorService(Executors.newFixedThreadPool(8))
-    val jobFactory = Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue)
-    QuartzTaskScheduler[IO, ParentTestJob](blocker, quartzProperties, jobFactory)
-  }
+  ): Resource[IO, QuartzTaskScheduler[IO, ParentTestJob]] =
+    Fs2StreamJobFactory.autoAcking[IO, ParentTestJob](messageQueue).flatMap { jobFactory =>
+      QuartzTaskScheduler[IO, ParentTestJob](quartzProperties, jobFactory)
+    }
 
   it should "schedule jobs to run every second" in {
     val elementCount = 6
@@ -80,7 +76,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
               JobScheduledAt(Instant.now.plusSeconds(2))
             )
             .flatTap(runTime => IO(println(s"Next single job scheduled for $runTime"))) *>
-          messageQueue.dequeue.take(elementCount.toLong).compile.toList
+          messageQueue.take.replicateA(elementCount)
       }
     }
     val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
