@@ -5,8 +5,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class Fs2QuartzConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
-  behavior of "Fs2QuartzConfig"
+class Quartz4sConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+  behavior of "Quartz4sConfig"
 
   val sizedStringGen =
     Gen.chooseNum[Int](8, 16).flatMap(num => Gen.buildableOfN[String, Char](num, Gen.asciiPrintableChar))
@@ -19,7 +19,7 @@ class Fs2QuartzConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDrive
       sizedStringGen,
       sizedStringGen,
     ) { case (threadCount, maxConnections, jdbcUrl, username, password) =>
-      val quartzConfig = Fs2QuartzConfig(
+      val quartzConfig = Quartz4sConfig(
         JobStoreConfig(
           driverDelegateClass = classOf[org.quartz.impl.jdbcjobstore.PostgreSQLDelegate],
         ),

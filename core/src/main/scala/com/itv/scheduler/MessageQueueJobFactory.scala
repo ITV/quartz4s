@@ -46,7 +46,7 @@ class AckingQueueJobFactory[F[_]: Async, M[*[_], _], A: JobDecoder](
     )
 }
 
-object Fs2StreamJobFactory {
+object MessageQueueJobFactory {
   def autoAcking[F[_]: Sync, A: JobDecoder](
       messages: Queue[F, A],
       dispatcher: Dispatcher[F]

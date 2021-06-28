@@ -37,7 +37,7 @@ object DataSourceConfig {
   }
 }
 
-final case class Fs2QuartzConfig(
+final case class Quartz4sConfig(
     jobStore: JobStoreConfig,
     threadPool: ThreadPoolConfig,
     dataSource: DataSourceConfig,
