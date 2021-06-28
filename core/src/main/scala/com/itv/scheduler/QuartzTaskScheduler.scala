@@ -43,7 +43,7 @@ class QuartzTaskScheduler[F[_], J](
 
   override def createJob(jobKey: JobKey, job: J): F[Unit] =
     F.blocking {
-      val jobData: JobData = jobDataEncoder(job)
+      val jobData: JobData = jobDataEncoder.toJobData(job)
       val jobDetail = newJob(classOf[PublishCallbackJob])
         .withIdentity(jobKey)
         .usingJobData(jobData.toJobDataMap)
