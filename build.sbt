@@ -7,7 +7,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.12", scalaVersion.value),
-  bloopAggregateSourceDependencies in Global := true,
+  Global / bloopAggregateSourceDependencies := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
