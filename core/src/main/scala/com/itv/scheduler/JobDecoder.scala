@@ -103,7 +103,7 @@ object JobDecoder extends PrimitiveDecoders {
 }
 
 trait PrimitiveDecoders {
-  private def decodeFailure[A: ClassTag](value: String)(implicit tag: ClassTag[A]): Throwable =
+  private def decodeFailure[A](value: String)(implicit tag: ClassTag[A]): Throwable =
     new IllegalArgumentException(s"Unable to parse value `$value` as type ${tag.runtimeClass.getSimpleName}")
 
   //For 2.12 compat
