@@ -1,17 +1,17 @@
 import sbt._
 
-bloopExportJarClassifiers in Global := Some(Set("sources"))
+Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.2" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.0" cross CrossVersion.full),
   organization := "com.itv",
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.12", scalaVersion.value),
-  bloopAggregateSourceDependencies in Global := true,
+  Global / bloopAggregateSourceDependencies := true,
   credentials ++=
     Seq(".itv-credentials", ".user-credentials", ".credentials")
       .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
-  publishTo in ThisBuild := {
+  ThisBuild / publishTo := {
     val artifactory = "https://itvrepos.jfrog.io/itvrepos/oasvc-ivy"
     if (isSnapshot.value)
       Some("Artifactory Realm" at artifactory)
@@ -68,8 +68,8 @@ lazy val docs = project
   .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
-    skip in publish := true,
-    mdocOut := baseDirectory.in(ThisBuild).value,
+    publish / skip := true,
+    mdocOut := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "FS2_QUARTZ_VERSION" -> version.value
     ),
