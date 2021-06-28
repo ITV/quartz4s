@@ -10,6 +10,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.12", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
+  licenses := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   pomExtra :=
