@@ -61,7 +61,7 @@ object JobDataEncoder extends PrimitiveEncoders {
         tailEncoder.value.encode(r.tail)
     }
 
-  implicit def deriveEncoder[In: ClassTag, Repr <: HList](implicit
+  implicit def deriveEncoder[In, Repr <: HList](implicit
       gen: LabelledGeneric.Aux[In, Repr],
       tag: ClassTag[In],
       lp: LowPriority,
