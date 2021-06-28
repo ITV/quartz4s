@@ -1,8 +1,10 @@
-addSbtPlugin("ch.epfl.scala"          % "sbt-bloop"        % "1.4.5")
-addSbtPlugin("org.scalameta"          % "sbt-scalafmt"     % "2.4.2")
-addSbtPlugin("com.github.daniel-shuy" % "sbt-release-mdoc" % "1.0.1")
-//addSbtPlugin("com.geirsson"              % "sbt-ci-release"   % "1.5.4")
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.20")
+addSbtPlugin("ch.epfl.scala"             % "sbt-bloop"        % "1.4.5")
+addSbtPlugin("org.scalameta"             % "sbt-scalafmt"     % "2.4.2")
+addSbtPlugin("com.github.daniel-shuy"    % "sbt-release-mdoc" % "1.0.1")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"     % "0.1.20")
+
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.4")
+addSbtPlugin("com.github.sbt" % "sbt-pgp"      % "2.1.2")
 
 val mdocVersion = "2.2.13"
 addSbtPlugin("org.scalameta"            % "sbt-mdoc" % mdocVersion)

@@ -1,23 +1,41 @@
 import sbt._
+import ReleaseTransformations._
 
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.0" cross CrossVersion.full),
   organization := "com.itv",
+  organizationName := "ITV",
   scalaVersion := "2.13.4",
   crossScalaVersions := Seq("2.12.12", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
-  credentials ++=
-    Seq(".itv-credentials", ".user-credentials", ".credentials")
-      .map(fileName => Credentials(Path.userHome / ".ivy2" / fileName)),
-  ThisBuild / publishTo := {
-    val artifactory = "https://itvrepos.jfrog.io/itvrepos/oasvc-ivy"
-    if (isSnapshot.value)
-      Some("Artifactory Realm" at artifactory)
-    else
-      Some("Artifactory Realm" at artifactory + ";build.timestamp=" + new java.util.Date().getTime)
-  },
+  licenses := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
+  ThisBuild / publishTo := sonatypePublishToBundle.value,
+  publishMavenStyle := true,
+  pomExtra :=
+    <url>https://github.com/ITV/quartz4s</url>
+      <licenses>
+        <license>
+          <name>ITV-OSS</name>
+          <url>http://itv.com/itv-oss-licence-v1.0</url>
+          <distribution>repo</distribution>
+        </license>
+      </licenses>
+      <developers>
+        <developer>
+          <id>agustafson</id>
+          <name>Andrew Gustafson</name>
+          <organization>ITV</organization>
+          <organizationUrl>http://www.itv.com</organizationUrl>
+        </developer>
+        <developer>
+          <id>jbwheatley</id>
+          <name>Jack Wheatley</name>
+          <organization>ITV</organization>
+          <organizationUrl>http://www.itv.com</organizationUrl>
+        </developer>
+      </developers>
 )
 
 def createProject(projectName: String): Project =
@@ -80,3 +98,21 @@ lazy val docs = project
   .dependsOn(core, extruder)
 
 addCommandAlias("buildQuartz4s", ";clean;+test;mdoc")
+
+releaseCrossBuild := true // true if you cross-build the project for multiple Scala versions
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
+  ReleaseMdocStateTransformations.commitMdoc,
+  tagRelease,
+  releaseStepCommandAndRemaining("+publishSigned"),
+  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
