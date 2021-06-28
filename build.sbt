@@ -15,13 +15,6 @@ val commonSettings: Seq[Setting[_]] = Seq(
   publishMavenStyle := true,
   pomExtra :=
     <url>https://github.com/ITV/quartz4s</url>
-      <licenses>
-        <license>
-          <name>ITV-OSS</name>
-          <url>http://itv.com/itv-oss-licence-v1.0</url>
-          <distribution>repo</distribution>
-        </license>
-      </licenses>
       <developers>
         <developer>
           <id>agustafson</id>
