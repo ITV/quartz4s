@@ -14,7 +14,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   ThisBuild / publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
   pomExtra :=
-    <url>https://github.com/ITV/scala-pact</url>
+    <url>https://github.com/ITV/quartz4s</url>
       <licenses>
         <license>
           <name>ITV-OSS</name>
