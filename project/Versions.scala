@@ -1,5 +1,6 @@
 object Versions {
   val catsEffect          = "2.3.0"
+  val collectionCompat    = "2.4.4"
   val extruder            = "0.11.0"
   val flyway              = "7.3.0"
   val fs2                 = "2.4.6"
