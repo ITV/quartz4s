@@ -107,7 +107,7 @@ releaseProcess := Seq[ReleaseStep](
   runTest,
   setReleaseVersion,
   commitReleaseVersion,
-  ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
+  releaseStepInputTask(MdocPlugin.autoImport.mdoc),
   ReleaseMdocStateTransformations.commitMdoc,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
