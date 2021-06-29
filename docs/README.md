@@ -26,9 +26,8 @@ decoded and put onto an `cats.effect.std.Queue`.
 
 ## Create some job types
 We need to have a set of types to encode and decode.
-The [extruder](https://janstenpickle.github.io/extruder/) project provides the ability to
-encode/decode an object as a `Map[String, String]`, which works perfectly for 
-putting data into the quartz `JobDataMap`.
+We provide the ability to encode/decode an object as a `Map[String, String]`, which works perfectly for 
+putting data into the quartz `JobDataMap`. (Heavily inspired by [extruder](https://janstenpickle.github.io/extruder/)).
 ```scala mdoc
 import com.itv.scheduler.{JobDataEncoder, JobDecoder}
 import com.itv.scheduler.extruder.semiauto._
@@ -40,6 +39,7 @@ case class UserJob(id: String) extends ParentJob
 object ParentJob {
   implicit val jobDataEncoder: JobDataEncoder[ParentJob] = deriveJobEncoder[ParentJob]
   implicit val jobDecoder: JobDecoder[ParentJob]         = deriveJobDecoder[ParentJob]
+  //or, simply: implicit val jobDecoder: JobCodec[ParentJob] = deriveJobCodec[ParentJob]
 }
 ```
 
