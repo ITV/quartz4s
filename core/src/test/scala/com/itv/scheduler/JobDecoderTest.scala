@@ -10,24 +10,21 @@ import QuartzOps._
 class JobDecoderTest extends AnyFlatSpec with Matchers with MockFactory {
   behavior of "JobDecoder"
 
-  def decodeMap[A](decoder: JobDecoder[A])(map: Map[String, String]): A = {
+  def decodeMap[A: JobDecoder](map: Map[String, String]): A = {
     val jobExecutionContext = stub[JobExecutionContext]
     val jobDetail           = stub[JobDetail]
     (jobExecutionContext.getJobDetail _).when().returns(jobDetail)
     (jobDetail.getJobDataMap _).when().returns(JobData(map).toJobDataMap)
-    decoder.apply(jobExecutionContext).valueOr(error => fail(s"Could not decode map due to: $error"))
+    JobDecoder[A].apply(jobExecutionContext).valueOr(error => fail(s"Could not decode map due to: $error"))
   }
 
   it should "decode values of a sealed trait correctly" in {
-    val decoder: JobDecoder[ParentTestJob] = JobDecoder[ParentTestJob]
-
-    decodeMap(decoder)(Map("type" -> "ChildObjectJob")) shouldBe ChildObjectJob
-    decodeMap(decoder)(Map("type" -> "UserJob", "userjob.id" -> "123")) shouldBe UserJob("123")
+    decodeMap[ParentTestJob](Map("type" -> "ChildObjectJob")) shouldBe ChildObjectJob
+    decodeMap[ParentTestJob](Map("type" -> "UserJob", "userjob.id" -> "123")) shouldBe UserJob("123")
   }
 
   it should "decode case class correctly where there is nesting" in {
-    val decoder: JobDecoder[JobWithNesting] = JobDecoder[JobWithNesting]
-    decodeMap(decoder)(
+    decodeMap[JobWithNesting](
       Map(
         "jobwithnesting.a"            -> "bob",
         "jobwithnesting.b"            -> "true",

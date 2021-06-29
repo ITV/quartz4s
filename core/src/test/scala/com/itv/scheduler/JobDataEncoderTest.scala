@@ -7,14 +7,14 @@ class JobDataEncoderTest extends AnyFlatSpec with Matchers {
   behavior of "JobDataEncoder"
 
   it should "encode a sealed trait correctly" in {
-    val encoder = JobDataEncoder[ParentTestJob]
-    encoder.toJobData(ChildObjectJob) shouldBe JobData(Map("type" -> "ChildObjectJob"))
-    encoder.toJobData(UserJob("123")) shouldBe JobData(Map("type" -> "UserJob", "userjob.id" -> "123"))
+    JobDataEncoder[ParentTestJob].toJobData(ChildObjectJob) shouldBe JobData(Map("type" -> "ChildObjectJob"))
+    JobDataEncoder[ParentTestJob].toJobData(UserJob("123")) shouldBe JobData(
+      Map("type" -> "UserJob", "userjob.id" -> "123")
+    )
   }
 
   it should "encode a case class correctly where there is nesting" in {
-    val encoder = JobDataEncoder[JobWithNesting]
-    encoder.toJobData(JobWithNesting("bob", Some(true), UserJob("123"), None)) shouldBe JobData(
+    JobDataEncoder[JobWithNesting].toJobData(JobWithNesting("bob", Some(true), UserJob("123"), None)) shouldBe JobData(
       Map(
         "jobwithnesting.a"            -> "bob",
         "jobwithnesting.b"            -> "true",

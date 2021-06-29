@@ -2,7 +2,6 @@ package com.itv.scheduler
 
 import java.time.Instant
 import java.util.Date
-
 import cats.effect._
 import cats.syntax.all._
 import cats.Apply
