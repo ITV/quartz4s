@@ -1,7 +1,6 @@
 object Versions {
   val catsEffect          = "3.1.1"
   val collectionCompat    = "2.4.4"
-  val extruder            = "0.11.0"
   val flyway              = "7.10.0"
   val hikari              = "3.4.5"
   val logback             = "1.2.3"
@@ -10,5 +9,6 @@ object Versions {
   val scalatest           = "3.2.9"
   val scalatestScalacheck = "3.2.9.0"
   val scalamock           = "5.1.0"
+  val shapeless           = "2.3.7"
   val testContainers      = "0.39.5"
 }

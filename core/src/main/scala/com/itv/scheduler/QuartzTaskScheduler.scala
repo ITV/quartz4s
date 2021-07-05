@@ -2,7 +2,6 @@ package com.itv.scheduler
 
 import java.time.Instant
 import java.util.Date
-
 import cats.effect._
 import cats.syntax.all._
 import cats.Apply
@@ -43,7 +42,7 @@ class QuartzTaskScheduler[F[_], J](
 
   override def createJob(jobKey: JobKey, job: J): F[Unit] =
     F.blocking {
-      val jobData: JobData = jobDataEncoder(job)
+      val jobData: JobData = jobDataEncoder.toJobData(job)
       val jobDetail = newJob(classOf[PublishCallbackJob])
         .withIdentity(jobKey)
         .usingJobData(jobData.toJobDataMap)

@@ -44,7 +44,7 @@ def createProject(projectName: String): Project =
     .settings(name := s"quartz4s-$projectName")
 
 lazy val root = (project in file("."))
-  .aggregate(core, extruder, docs)
+  .aggregate(core, docs)
   .settings(commonSettings)
   .settings(
     publish / skip := true,
@@ -55,6 +55,7 @@ lazy val core = createProject("core")
     libraryDependencies ++= Seq(
       "org.quartz-scheduler"    % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"          %% "cats-effect"                     % Versions.catsEffect,
+      "com.chuusai"            %% "shapeless"                       % Versions.shapeless,
       "org.scala-lang.modules" %% "scala-collection-compat"         % Versions.collectionCompat,
       "org.scalatest"          %% "scalatest"                       % Versions.scalatest           % Test,
       "org.scalatestplus"      %% "scalacheck-1-15"                 % Versions.scalatestScalacheck % Test,
@@ -64,19 +65,7 @@ lazy val core = createProject("core")
       "com.zaxxer"              % "HikariCP"                        % Versions.hikari              % Test,
       "org.flywaydb"            % "flyway-core"                     % Versions.flyway              % Test,
       "ch.qos.logback"          % "logback-classic"                 % Versions.logback             % Test,
-    ),
-  )
-
-lazy val extruder = createProject("extruder")
-  .dependsOn(core)
-  .settings(
-    resolvers += Resolver.bintrayRepo("janstenpickle", "extruder"),
-    libraryDependencies ++= Seq(
-      "io.extruder"       %% "extruder-core"   % Versions.extruder,
-      "org.scalatest"     %% "scalatest"       % Versions.scalatest           % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % Versions.scalatestScalacheck % Test,
-      "org.scalamock"     %% "scalamock"       % Versions.scalamock           % Test,
-      "ch.qos.logback"     % "logback-classic" % Versions.logback             % Test,
+      "org.scalamock"          %% "scalamock"                       % Versions.scalamock           % Test,
     ),
   )
 
@@ -95,7 +84,7 @@ lazy val docs = project
       ReleaseMdocStateTransformations.commitMdoc,
     ),
   )
-  .dependsOn(core, extruder)
+  .dependsOn(core)
 
 addCommandAlias("buildQuartz4s", ";clean;+test;mdoc")
 

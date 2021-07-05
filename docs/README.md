@@ -26,21 +26,20 @@ decoded and put onto an `cats.effect.std.Queue`.
 
 ## Create some job types
 We need to have a set of types to encode and decode.
-The [extruder](https://janstenpickle.github.io/extruder/) project provides the ability to
-encode/decode an object as a `Map[String, String]`, which works perfectly for 
-putting data into the quartz `JobDataMap`.
+We provide the ability to encode/decode an object as a `Map[String, String]`, which works perfectly for 
+putting data into the quartz `JobDataMap`. (Heavily inspired by [extruder](https://janstenpickle.github.io/extruder/)).
 ```scala mdoc
 import com.itv.scheduler.{JobDataEncoder, JobDecoder}
-import com.itv.scheduler.extruder.implicits._
-import extruder.map._
+import com.itv.scheduler.extruder.semiauto._
 
 sealed trait ParentJob
 case object ChildObjectJob     extends ParentJob
 case class UserJob(id: String) extends ParentJob
 
 object ParentJob {
-  implicit val jobDataEncoder: JobDataEncoder[ParentJob] = deriveEncoder[ParentJob]
-  implicit val jobDecoder: JobDecoder[ParentJob]         = deriveDecoder[ParentJob]
+  implicit val jobDataEncoder: JobDataEncoder[ParentJob] = deriveJobEncoder[ParentJob]
+  implicit val jobDecoder: JobDecoder[ParentJob]         = deriveJobDecoder[ParentJob]
+  //or, simply: implicit val jobCodec: JobCodec[ParentJob] = deriveJobCodec[ParentJob]
 }
 ```
 
@@ -85,8 +84,6 @@ val ackingJobFactory: Resource[IO, AckingQueueJobFactory[IO, AckableMessage, Par
 
 ### Creating a scheduler
 ```scala mdoc
-import com.itv.scheduler.extruder.implicits._
-
 val quartzProperties = QuartzProperties(new java.util.Properties())
 val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
   autoAckJobFactory.flatMap { jobFactory => 
