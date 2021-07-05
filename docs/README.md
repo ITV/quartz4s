@@ -39,7 +39,7 @@ case class UserJob(id: String) extends ParentJob
 object ParentJob {
   implicit val jobDataEncoder: JobDataEncoder[ParentJob] = deriveJobEncoder[ParentJob]
   implicit val jobDecoder: JobDecoder[ParentJob]         = deriveJobDecoder[ParentJob]
-  //or, simply: implicit val jobDecoder: JobCodec[ParentJob] = deriveJobCodec[ParentJob]
+  //or, simply: implicit val jobCodec: JobCodec[ParentJob] = deriveJobCodec[ParentJob]
 }
 ```
 
