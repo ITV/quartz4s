@@ -1,11 +1,10 @@
 package com.itv.scheduler.extruder
 
 import cats.data.Chain
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.{JobDecoder, PartiallyDecodedJobData}
 
 import scala.reflect.ClassTag
-import scala.util.control.NonFatal
 
 trait PrimitiveDecoders {
   private def decodeFailure[A](value: String)(implicit tag: ClassTag[A]): Throwable =
@@ -13,10 +12,7 @@ trait PrimitiveDecoders {
 
   //For 2.12 compat
   private def tryDecode[A: ClassTag](f: String => A)(value: String): Either[Throwable, A] =
-    try Right(f(value))
-    catch {
-      case NonFatal(_) => Left(decodeFailure(value))
-    }
+    Either.catchNonFatal(f(value)).leftMap(_ => decodeFailure(value))
 
   implicit val stringDecoder: JobDecoder[String] = (path: Chain[String], jobData: PartiallyDecodedJobData) =>
     Either.fromOption(

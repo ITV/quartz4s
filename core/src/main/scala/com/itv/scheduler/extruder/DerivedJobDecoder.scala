@@ -1,7 +1,7 @@
 package com.itv.scheduler.extruder
 
 import cats.data.Chain
-import cats.implicits._
+import cats.syntax.all._
 import com.itv.scheduler.{JobDecoder, PartiallyDecodedJobData}
 import shapeless._
 import shapeless.labelled.{FieldType, field}
