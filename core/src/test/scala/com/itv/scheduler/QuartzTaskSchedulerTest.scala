@@ -79,7 +79,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
           messageQueue.take.replicateA(elementCount)
       }
     }
-    val messages = result.unsafeRunTimed(5.seconds).getOrElse(fail("Operation timed out completing"))
+    val messages = result.unsafeRunTimed(10.seconds).getOrElse(fail("Operation timed out completing"))
 
     val expectedMessages: List[ParentTestJob] = List.fill[ParentTestJob](elementCount - 1)(ChildObjectJob) :+ userJob
     messages should contain theSameElementsAs expectedMessages
