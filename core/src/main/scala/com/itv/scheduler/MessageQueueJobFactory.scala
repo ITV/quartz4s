@@ -1,5 +1,6 @@
 package com.itv.scheduler
 
+import cats.MonadThrow
 import cats.effect._
 import cats.effect.kernel.Resource.ExitCase
 import cats.effect.std.{Dispatcher, Queue}
@@ -24,7 +25,7 @@ trait MessageQueueJobFactory[F[_], A] extends CallbackJobFactory {
   def messages: Queue[F, A]
 }
 
-class AutoAckingQueueJobFactory[F[_]: Sync, A: JobDecoder](
+class AutoAckingQueueJobFactory[F[_]: MonadThrow, A: JobDecoder](
     override val messages: Queue[F, A],
     dispatcher: Dispatcher[F]
 ) extends MessageQueueJobFactory[F, A] {
@@ -33,7 +34,7 @@ class AutoAckingQueueJobFactory[F[_]: Sync, A: JobDecoder](
 
 final case class AckableMessage[F[_], A](message: A, acker: MessageAcker[F])
 
-class AckingQueueJobFactory[F[_]: Async, M[*[_], _], A: JobDecoder](
+class AckingQueueJobFactory[F[_]: Concurrent, M[*[_], _], A: JobDecoder](
     override val messages: Queue[F, M[F, A]],
     messageConverter: (A, MessageAcker[F]) => M[F, A],
     dispatcher: Dispatcher[F]
@@ -47,7 +48,7 @@ class AckingQueueJobFactory[F[_]: Async, M[*[_], _], A: JobDecoder](
 }
 
 object MessageQueueJobFactory {
-  def autoAcking[F[_]: Sync, A: JobDecoder](
+  def autoAcking[F[_]: MonadThrow, A: JobDecoder](
       messages: Queue[F, A],
       dispatcher: Dispatcher[F]
   ): AutoAckingQueueJobFactory[F, A] =
@@ -59,7 +60,7 @@ object MessageQueueJobFactory {
     autoAcking(messages, d)
   }
 
-  def acking[F[_]: Async, A: JobDecoder](
+  def acking[F[_]: Concurrent, A: JobDecoder](
       messages: Queue[F, AckableMessage[F, A]],
       dispatcher: Dispatcher[F]
   ): AckingQueueJobFactory[F, AckableMessage, A] =
