@@ -5,7 +5,6 @@ Quarts scheduler library using cats-effect queues for handling results.
 ```scala
 libraryDependencies ++= Seq(
   "com.itv" %% "quartz4s-core"     % "@QUARTZ4S_VERSION@",
-  "com.itv" %% "quartz4s-extruder" % "@QUARTZ4S_VERSION@"
 )
 ```
 
