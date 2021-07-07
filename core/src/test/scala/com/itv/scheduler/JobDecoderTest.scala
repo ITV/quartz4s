@@ -15,7 +15,7 @@ class JobDecoderTest extends AnyFlatSpec with Matchers with MockFactory {
     val jobDetail           = stub[JobDetail]
     (jobExecutionContext.getJobDetail _).when().returns(jobDetail)
     (jobDetail.getJobDataMap _).when().returns(JobData(map).toJobDataMap)
-    JobDecoder[A].apply(jobExecutionContext).valueOr(error => fail(s"Could not decode map due to: $error"))
+    JobDecoder[A].decode(jobExecutionContext).valueOr(error => fail(s"Could not decode map due to: $error"))
   }
 
   it should "decode values of a sealed trait correctly" in {
