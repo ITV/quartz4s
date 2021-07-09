@@ -4,7 +4,7 @@ object Versions {
   val flyway              = "7.10.0"
   val hikari              = "3.4.5"
   val logback             = "1.2.3"
-  val postgresql          = "42.2.18"
+  val postgresql          = "42.2.23"
   val quartz              = "2.3.2"
   val scalatest           = "3.2.9"
   val scalatestScalacheck = "3.2.9.0"
