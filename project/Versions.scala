@@ -2,7 +2,7 @@ object Versions {
   val catsEffect          = "3.1.1"
   val collectionCompat    = "2.4.4"
   val flyway              = "7.10.0"
-  val hikari              = "3.4.5"
+  val hikari              = "4.0.3"
   val logback             = "1.2.3"
   val postgresql          = "42.2.18"
   val quartz              = "2.3.2"
