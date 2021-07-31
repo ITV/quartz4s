@@ -1,5 +1,5 @@
 object Versions {
-  val catsEffect          = "3.1.1"
+  val catsEffect          = "3.2.1"
   val collectionCompat    = "2.4.4"
   val flyway              = "7.10.0"
   val hikari              = "3.4.5"
