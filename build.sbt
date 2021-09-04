@@ -4,7 +4,7 @@ import ReleaseTransformations._
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.0" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/ITV/quartz4s"),
