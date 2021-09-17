@@ -6,7 +6,7 @@ object Versions {
   val logback             = "1.2.3"
   val postgresql          = "42.2.18"
   val quartz              = "2.3.2"
-  val scalatest           = "3.2.9"
+  val scalatest           = "3.2.10"
   val scalatestScalacheck = "3.2.9.0"
   val scalamock           = "5.1.0"
   val shapeless           = "2.3.7"
