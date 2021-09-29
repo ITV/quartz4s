@@ -1,5 +1,7 @@
 package com.itv.scheduler.extruder
 
+import java.util.UUID
+
 import cats.data.Chain
 import cats.syntax.all._
 import com.itv.scheduler.{JobDecoder, PartiallyDecodedJobData}
@@ -31,6 +33,8 @@ trait PrimitiveDecoders {
     stringDecoder.emap(tryDecode(_.toDouble))
   implicit val floatDecoder: JobDecoder[Float] =
     stringDecoder.emap(tryDecode(_.toFloat))
+  implicit val uuidDecoder: JobDecoder[UUID] =
+    stringDecoder.emap(tryDecode(UUID.fromString))
   implicit def optionDecoder[A: JobDecoder]: JobDecoder[Option[A]] =
     (path: Chain[String], jobData: PartiallyDecodedJobData) => JobDecoder[A].read(path, jobData).toOption.asRight
   implicit def eitherDecoder[A: JobDecoder, B: JobDecoder]: JobDecoder[Either[A, B]] =
