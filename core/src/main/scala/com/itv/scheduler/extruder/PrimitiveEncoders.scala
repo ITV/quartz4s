@@ -1,5 +1,7 @@
 package com.itv.scheduler.extruder
 
+import java.util.UUID
+
 import com.itv.scheduler.JobDataEncoder
 
 trait PrimitiveEncoders {
@@ -11,6 +13,7 @@ trait PrimitiveEncoders {
   implicit val doubleEncoder: JobDataEncoder[Double]   = makeFromToString
   implicit val floatEncoder: JobDataEncoder[Float]     = makeFromToString
   implicit val charEncoder: JobDataEncoder[Char]       = makeFromToString
+  implicit val uuidEncoder: JobDataEncoder[UUID]       = makeFromToString
   implicit def optionEncoder[A: JobDataEncoder]: JobDataEncoder[Option[A]] = (_: Option[A]) match {
     case Some(a) => JobDataEncoder[A].apply(a)
     case None    => Map()
