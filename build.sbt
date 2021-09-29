@@ -4,7 +4,7 @@ import ReleaseTransformations._
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.0" cross CrossVersion.full),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/ITV/quartz4s"),
@@ -14,7 +14,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   organization := "com.itv",
   organizationName := "ITV",
   scalaVersion := "2.13.5",
-  crossScalaVersions := Seq("2.12.14", scalaVersion.value),
+  crossScalaVersions := Seq("2.12.15", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
   licenses := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / publishTo := sonatypePublishToBundle.value,
