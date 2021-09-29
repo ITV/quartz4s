@@ -3,7 +3,10 @@ package com.itv.scheduler
 import cats.data.Chain
 import cats.{Contravariant, Functor, Invariant}
 
-trait JobCodec[A] extends JobDecoder[A] with JobDataEncoder[A]
+trait JobCodec[A] extends JobDecoder[A] with JobDataEncoder[A] {
+  def iemap[B](f: A => Either[Throwable, B])(g: B => A): JobCodec[B] =
+    JobCodec.from(emap(f), Contravariant[JobDataEncoder].contramap(this)(g))
+}
 
 object JobCodec {
   implicit val invariantInstance: Invariant[JobCodec] = new Invariant[JobCodec] {
