@@ -1,5 +1,6 @@
 package com.itv.scheduler
 
+import cats.Functor
 import cats.data.Chain
 import cats.syntax.all._
 import com.itv.scheduler.QuartzOps.JobDataMapOps
@@ -18,6 +19,12 @@ trait JobDecoder[A] { self =>
 }
 
 object JobDecoder {
+  implicit val functorInstance: Functor[JobDecoder] =
+    new Functor[JobDecoder] {
+      override def map[A, B](fa: JobDecoder[A])(f: A => B): JobDecoder[B] =
+        JobDecoder.instance[B](fa.read(_, _).map(f))
+    }
+
   def apply[A](implicit ev: JobDecoder[A]): JobDecoder[A] = ev
 
   def instance[A](read: (Chain[String], PartiallyDecodedJobData) => Either[Throwable, A]): JobDecoder[A] =
