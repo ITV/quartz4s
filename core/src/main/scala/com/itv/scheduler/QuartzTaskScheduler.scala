@@ -61,7 +61,7 @@ class QuartzTaskScheduler[F[_], J](
       val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
         case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
         case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
-        case SimpleJob(repeatEvery)           => _.withSchedule(repeatSecondlyForever(repeatEvery.toSeconds.toInt.max(1)))
+        case SimpleJob(repeatEvery) => _.withSchedule(repeatSecondlyForever(repeatEvery.toSeconds.toInt.max(1)))
       }
       val trigger = triggerUpdate(newTrigger().withIdentity(triggerKey).forJob(jobKey)).build()
       Option(scheduler.rescheduleJob(triggerKey, trigger))

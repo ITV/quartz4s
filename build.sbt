@@ -11,15 +11,15 @@ val commonSettings: Seq[Setting[_]] = Seq(
       "scm:git@github.com:ITV/quartz4s.git"
     )
   ),
-  organization := "com.itv",
-  organizationName := "ITV",
-  scalaVersion := "2.13.5",
-  crossScalaVersions := Seq("2.12.15", scalaVersion.value),
+  organization                              := "com.itv",
+  organizationName                          := "ITV",
+  scalaVersion                              := "2.13.5",
+  crossScalaVersions                        := Seq("2.12.15", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
-  licenses := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
-  ThisBuild / publishTo := sonatypePublishToBundle.value,
-  ThisBuild / pomIncludeRepository := { _ => false },
-  publishMavenStyle := true,
+  licenses                                  := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
+  ThisBuild / publishTo                     := sonatypePublishToBundle.value,
+  ThisBuild / pomIncludeRepository          := { _ => false },
+  publishMavenStyle                         := true,
   pomExtra :=
     <url>https://github.com/ITV/quartz4s</url>
       <developers>
@@ -53,19 +53,19 @@ lazy val root = (project in file("."))
 lazy val core = createProject("core")
   .settings(
     libraryDependencies ++= Seq(
-      "org.quartz-scheduler"    % "quartz"                          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
-      "org.typelevel"          %% "cats-effect"                     % Versions.catsEffect,
-      "com.chuusai"            %% "shapeless"                       % Versions.shapeless,
-      "org.scala-lang.modules" %% "scala-collection-compat"         % Versions.collectionCompat,
-      "org.scalatest"          %% "scalatest"                       % Versions.scalatest           % Test,
-      "org.scalatestplus"      %% "scalacheck-1-15"                 % Versions.scalatestScalacheck % Test,
-      "com.dimafeng"           %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
-      "com.dimafeng"           %% "testcontainers-scala-postgresql" % Versions.testContainers      % Test,
-      "org.postgresql"          % "postgresql"                      % Versions.postgresql          % Test,
-      "com.zaxxer"              % "HikariCP"                        % Versions.hikari              % Test,
-      "org.flywaydb"            % "flyway-core"                     % Versions.flyway              % Test,
-      "ch.qos.logback"          % "logback-classic"                 % Versions.logback             % Test,
-      "org.scalamock"          %% "scalamock"                       % Versions.scalamock           % Test,
+      "org.quartz-scheduler"    % "quartz"                  % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "org.typelevel"          %% "cats-effect"             % Versions.catsEffect,
+      "com.chuusai"            %% "shapeless"               % Versions.shapeless,
+      "org.scala-lang.modules" %% "scala-collection-compat" % Versions.collectionCompat,
+      "org.scalatest"          %% "scalatest"               % Versions.scalatest           % Test,
+      "org.scalatestplus"      %% "scalacheck-1-15"         % Versions.scalatestScalacheck % Test,
+      "com.dimafeng"  %% "testcontainers-scala-scalatest"  % Versions.testContainers % Test,
+      "com.dimafeng"  %% "testcontainers-scala-postgresql" % Versions.testContainers % Test,
+      "org.postgresql" % "postgresql"                      % Versions.postgresql     % Test,
+      "com.zaxxer"     % "HikariCP"                        % Versions.hikari         % Test,
+      "org.flywaydb"   % "flyway-core"                     % Versions.flyway         % Test,
+      "ch.qos.logback" % "logback-classic"                 % Versions.logback        % Test,
+      "org.scalamock" %% "scalamock"                       % Versions.scalamock      % Test,
     ),
   )
 
@@ -75,7 +75,7 @@ lazy val docs = project
   .settings(commonSettings)
   .settings(
     publish / skip := true,
-    mdocOut := (ThisBuild / baseDirectory).value,
+    mdocOut        := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "QUARTZ4S_VERSION" -> version.value
     ),

@@ -14,7 +14,9 @@ class JobDataEncoderTest extends AnyFlatSpec with Matchers {
   }
 
   it should "encode a case class correctly where there is nesting" in {
-    JobDataEncoder[JobWithNesting].encode(JobWithNesting("bob", Some(true), UserJob(UserId("123")), None)) shouldBe JobData(
+    JobDataEncoder[JobWithNesting].encode(
+      JobWithNesting("bob", Some(true), UserJob(UserId("123")), None)
+    ) shouldBe JobData(
       Map(
         "jobwithnesting.a"            -> "bob",
         "jobwithnesting.b"            -> "true",
