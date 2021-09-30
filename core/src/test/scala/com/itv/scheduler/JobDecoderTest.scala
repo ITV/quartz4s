@@ -20,7 +20,7 @@ class JobDecoderTest extends AnyFlatSpec with Matchers with MockFactory {
 
   it should "decode values of a sealed trait correctly" in {
     decodeMap[ParentTestJob](Map("type" -> "ChildObjectJob")) shouldBe ChildObjectJob
-    decodeMap[ParentTestJob](Map("type" -> "UserJob", "userjob.id" -> "123")) shouldBe UserJob("123")
+    decodeMap[ParentTestJob](Map("type" -> "UserJob", "userjob.id" -> "123")) shouldBe UserJob(UserId("123"))
   }
 
   it should "decode case class correctly where there is nesting" in {
@@ -31,7 +31,7 @@ class JobDecoderTest extends AnyFlatSpec with Matchers with MockFactory {
         "jobwithnesting.c.type"       -> "UserJob",
         "jobwithnesting.c.userjob.id" -> "123"
       )
-    ) shouldBe JobWithNesting("bob", Some(true), UserJob("123"), None)
+    ) shouldBe JobWithNesting("bob", Some(true), UserJob(UserId("123")), None)
   }
 
 }

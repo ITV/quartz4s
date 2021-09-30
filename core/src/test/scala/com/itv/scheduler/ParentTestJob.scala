@@ -3,7 +3,7 @@ package com.itv.scheduler
 import extruder.semiauto._
 
 sealed trait ParentTestJob
-case class UserJob(id: String) extends ParentTestJob
+case class UserJob(id: UserId) extends ParentTestJob
 case object ChildObjectJob     extends ParentTestJob
 
 object ParentTestJob {

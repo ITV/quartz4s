@@ -56,7 +56,7 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
 
   it should "schedule jobs to run every second" in {
     val elementCount = 6
-    val userJob      = UserJob("user-id-123")
+    val userJob      = UserJob(UserId("user-id-123"))
 
     val result = Queue.unbounded[IO, ParentTestJob] >>= { messageQueue =>
       schedulerResource(messageQueue).use { scheduler =>
