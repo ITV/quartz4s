@@ -1,15 +1,23 @@
 package com.itv.scheduler
 
 import cats.Eq
+import org.quartz.JobExecutionContext
 import org.scalacheck._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.derive._
+import org.scalacheck.ScalacheckShapeless._
 
 trait Generators {
-  // Not quite sure how to define these any other way ...
-  implicit def eqJobDecoder[A]: Eq[JobDecoder[A]]         = Eq.allEqual[JobDecoder[A]]
-  implicit def eqJobDataEncoder[A]: Eq[JobDataEncoder[A]] = Eq.allEqual[JobDataEncoder[A]]
-  implicit def eqJobCodec[A]: Eq[JobCodec[A]]             = Eq.allEqual[JobCodec[A]]
+  def eqJobDecoder[A](jobExecutionContext: JobExecutionContext)(implicit
+      ev: Eq[Either[Throwable, A]]
+  ): Eq[JobDecoder[A]] =
+    Eq.by(_.decode(jobExecutionContext))
+
+  def eqJobDataEncoder[A](data: A): Eq[JobDataEncoder[A]] = Eq.by(_.encode(data))
+
+  implicit val eqThrowable: Eq[Throwable] = Eq.fromUniversalEquals
+
+  implicit def eqJobCodec[A](implicit ev1: Eq[JobDecoder[A]], ev2: Eq[JobDataEncoder[A]]): Eq[JobCodec[A]] =
+    Eq.and(Eq.by(_.asInstanceOf[JobDecoder[A]]), Eq.by(_.asInstanceOf[JobDataEncoder[A]]))
 
   implicit val jobWithNestingGen: Arbitrary[JobWithNesting] =
     MkArbitrary[JobWithNesting].arbitrary
