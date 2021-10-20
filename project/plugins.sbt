@@ -6,6 +6,6 @@ addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"     % "0.1.20")
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
 addSbtPlugin("com.github.sbt" % "sbt-pgp"      % "2.1.2")
 
-val mdocVersion = "2.2.23"
+val mdocVersion = "2.2.24"
 addSbtPlugin("org.scalameta"            % "sbt-mdoc" % mdocVersion)
 libraryDependencies += "org.scalameta" %% "mdoc"     % mdocVersion
