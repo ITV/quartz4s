@@ -1,6 +1,8 @@
 import sbt._
 import ReleaseTransformations._
 
+Global / onChangedBuildSource := ReloadOnSourceChanges
+
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
 val commonSettings: Seq[Setting[_]] = Seq(
