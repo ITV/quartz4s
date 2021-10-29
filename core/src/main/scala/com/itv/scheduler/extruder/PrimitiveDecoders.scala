@@ -12,7 +12,7 @@ trait PrimitiveDecoders {
   private def decodeFailure[A](value: String)(implicit tag: ClassTag[A]): Throwable =
     new IllegalArgumentException(s"Unable to parse value `$value` as type ${tag.runtimeClass.getSimpleName}")
 
-  //For 2.12 compat
+  // For 2.12 compat
   private def tryDecode[A: ClassTag](f: String => A)(value: String): Either[Throwable, A] =
     Either.catchNonFatal(f(value)).leftMap(_ => decodeFailure(value))
 
