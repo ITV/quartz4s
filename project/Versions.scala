@@ -7,7 +7,7 @@ object Versions {
   val hikari              = "5.0.0"
   val logback             = "1.2.6"
   val munit               = "0.7.29"
-  val postgresql          = "42.2.24"
+  val postgresql          = "42.3.1"
   val quartz              = "2.3.2"
   val scalatest           = "3.2.10"
   val scalacheckShapeless = "1.3.0"
