@@ -2,7 +2,7 @@ package com.itv.scheduler
 
 import cats.Functor
 import cats.data.Chain
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.itv.scheduler.QuartzOps.JobDataMapOps
 import org.quartz.JobExecutionContext
 

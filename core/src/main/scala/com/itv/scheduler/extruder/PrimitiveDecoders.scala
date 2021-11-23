@@ -3,7 +3,7 @@ package com.itv.scheduler.extruder
 import java.util.UUID
 
 import cats.data.Chain
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.itv.scheduler.{JobDecoder, PartiallyDecodedJobData}
 
 import scala.reflect.ClassTag
@@ -28,7 +28,7 @@ trait PrimitiveDecoders {
   implicit val longDecoder: JobDecoder[Long] =
     stringDecoder.emap(tryDecode(_.toLong))
   implicit val charDecoder: JobDecoder[Char] =
-    stringDecoder.emap(s => s.headOption.toRight(decodeFailure(s)))
+    stringDecoder.emap(s => s.headOption.toRight(decodeFailure[Char](s)))
   implicit val doubleDecoder: JobDecoder[Double] =
     stringDecoder.emap(tryDecode(_.toDouble))
   implicit val floatDecoder: JobDecoder[Float] =

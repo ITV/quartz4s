@@ -9,6 +9,10 @@ val commonSettings: Seq[Setting[_]] = Seq(
   libraryDependencies ++= Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   ).filterNot(_ => scalaVersion.value.startsWith("3.")),
+  scalacOptions ++= {
+    if (scalaVersion.value.startsWith("3.")) Nil
+    else Seq("-Ytasty-reader", "-Xsource:3", """-Wconf:msg=package object inheritance is deprecated:i""")
+  },
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/ITV/quartz4s"),
@@ -17,8 +21,8 @@ val commonSettings: Seq[Setting[_]] = Seq(
   ),
   organization                              := "com.itv",
   organizationName                          := "ITV",
-  scalaVersion                              := "3.1.0",
-  crossScalaVersions                        := Seq("2.12.15", "2.13.5", scalaVersion.value),
+  scalaVersion                              := "3.0.2",
+  crossScalaVersions                        := Seq("2.13.6", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / publishTo                     := sonatypePublishToBundle.value,
@@ -63,16 +67,17 @@ lazy val core = createProject("core")
       "org.scalatest"          %% "scalatest"               % Versions.scalatest           % Test,
       "org.scalatestplus"      %% "scalacheck-1-15"         % Versions.scalatestScalacheck % Test,
       "org.scalameta"          %% "munit"                   % Versions.munit               % Test,
-      "com.dimafeng"               %% "testcontainers-scala-scalatest"  % Versions.testContainers      % Test,
-      "com.dimafeng"               %% "testcontainers-scala-postgresql" % Versions.testContainers      % Test,
-      "org.postgresql"              % "postgresql"                      % Versions.postgresql          % Test,
-      "com.zaxxer"                  % "HikariCP"                        % Versions.hikari              % Test,
-      "org.flywaydb"                % "flyway-core"                     % Versions.flyway              % Test,
-      "ch.qos.logback"              % "logback-classic"                 % Versions.logback             % Test,
-      "org.scalamock"              %% "scalamock"                       % Versions.scalamock           % Test,
-      "org.typelevel"              %% "cats-laws"                       % Versions.cats                % Test,
-      "com.github.alexarchambault" %% "scalacheck-shapeless_1.15"       % Versions.scalacheckShapeless % Test,
-      "org.typelevel"              %% "discipline-munit"                % Versions.disciplineMunit     % Test,
+      "com.dimafeng"  %% "testcontainers-scala-scalatest"  % Versions.testContainers % Test,
+      "com.dimafeng"  %% "testcontainers-scala-postgresql" % Versions.testContainers % Test,
+      "org.postgresql" % "postgresql"                      % Versions.postgresql     % Test,
+      "com.zaxxer"     % "HikariCP"                        % Versions.hikari         % Test,
+      "org.flywaydb"   % "flyway-core"                     % Versions.flyway         % Test,
+      "ch.qos.logback" % "logback-classic"                 % Versions.logback        % Test,
+      ("org.scalamock" %% "scalamock" % Versions.scalamock % Test).cross(CrossVersion.for3Use2_13),
+      "org.typelevel"  %% "cats-laws" % Versions.cats      % Test,
+      ("com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless % Test)
+        .cross(CrossVersion.for3Use2_13),
+      "org.typelevel" %% "discipline-munit" % Versions.disciplineMunit % Test,
     ) ++ {
       if (scalaVersion.value.startsWith("3.")) {
         Seq(

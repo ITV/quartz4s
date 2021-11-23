@@ -1,14 +1,16 @@
 package com.itv.scheduler
 
-import org.quartz.{JobDataMap, JobDetail, JobExecutionContext}
-import org.scalamock.scalatest.MockFactory
+import org.quartz.*
+import org.quartz.impl.*
+import org.quartz.spi.TriggerFiredBundle
 
-object MockJobExecutionContext extends MockFactory {
-  def apply(jobDataMap: JobDataMap): JobExecutionContext = {
-    val jEC       = stub[JobExecutionContext]
-    val jobDetail = stub[JobDetail]
-    (jEC.getJobDetail _).when().returns(jobDetail)
-    (jobDetail.getJobDataMap _).when().returns(jobDataMap)
-    jEC
+object MockJobExecutionContext {
+  def apply(jobData: JobData): JobExecutionContext = {
+    val jobDetail = JobDetailOps.toJobDetail(jobData)
+    val job = new Job {
+      override def execute(context: JobExecutionContext): Unit = ()
+    }
+    val firedBundle = new TriggerFiredBundle(jobDetail, null, null, false, null, null, null, null)
+    new JobExecutionContextImpl(null, firedBundle, job)
   }
 }

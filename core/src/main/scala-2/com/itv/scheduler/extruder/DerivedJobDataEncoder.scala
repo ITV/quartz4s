@@ -33,8 +33,8 @@ trait DerivedEncoders extends PrimitiveEncoders {
       gen: LabelledGeneric.Aux[T, Repr],
       underlying: Lazy[CoproductEncoder[Repr]],
       lp: LowPriority,
-      neOpt: T <:!< Option[_],
-      neEither: T <:!< Either[_, _]
+      neOpt: T <:!< Option[?],
+      neEither: T <:!< Either[?, ?]
   ): DerivedJobDataEncoder[T] = (a: T) => {
     val _ = (lp, neOpt, neEither)
     underlying.value.apply(gen.to(a))

@@ -1,10 +1,10 @@
 package com.itv.scheduler.extruder
 
 import cats.data.Chain
-import cats.syntax.all._
+import cats.syntax.all.*
 import com.itv.scheduler.{JobDecoder, PartiallyDecodedJobData}
-import shapeless._
-import shapeless.labelled.{FieldType, field}
+import shapeless.*
+import shapeless.labelled.{field, FieldType}
 
 import scala.reflect.ClassTag
 
@@ -46,8 +46,8 @@ trait DerivedDecoders extends PrimitiveDecoders {
   implicit def unionDecoder[T, V <: Coproduct](implicit
       gen: LabelledGeneric.Aux[T, V],
       underlying: Lazy[CoproductDecoder[V]],
-      neOpt: T <:!< Option[_],
-      neEither: T <:!< Either[_, _]
+      neOpt: T <:!< Option[?],
+      neEither: T <:!< Either[?, ?]
   ): DerivedJobDecoder[T] = { (path: Chain[String], jobData: PartiallyDecodedJobData) =>
     val _ = (neOpt, neEither)
     underlying.value.read(path, jobData).map(gen.from)
