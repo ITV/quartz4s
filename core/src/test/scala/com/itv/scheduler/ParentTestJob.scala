@@ -7,8 +7,6 @@ import com.itv.scheduler.extruder.semiauto.*
 sealed trait ParentTestJob
 case class UserJob(id: UserId) extends ParentTestJob
 object UserJob {
-  implicit val jobCodec: JobCodec[UserJob] = deriveJobCodec
-
   implicit val eqInstance: Eq[UserJob] = Eq.by(_.id)
 }
 case object ChildObjectJob extends ParentTestJob
