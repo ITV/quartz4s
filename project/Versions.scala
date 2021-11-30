@@ -1,5 +1,5 @@
 object Versions {
-  val cats                = "2.6.1"
+  val cats                = "2.7.0"
   val catsEffect          = "3.2.9"
   val collectionCompat    = "2.5.0"
   val disciplineMunit     = "1.0.9"
