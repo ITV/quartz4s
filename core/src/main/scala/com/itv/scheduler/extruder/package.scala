@@ -5,5 +5,5 @@ package object extruder {
 
   object semiauto extends DerivedDecoders with DerivedEncoders with DeriveSyntax
 
-  object derivingImplicits extends DerivedDecoders with DerivedEncoders
+  object deriving extends DerivedDecoders with DerivedEncoders
 }

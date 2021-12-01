@@ -1,16 +1,30 @@
 package com.itv.scheduler
 
 import org.quartz.*
-import org.quartz.impl.*
-import org.quartz.spi.TriggerFiredBundle
+import java.util.Date
 
 object MockJobExecutionContext {
-  def apply(jobData: JobData): JobExecutionContext = {
-    val jobDetail = JobDetailOps.toJobDetail(jobData)
-    val job = new Job {
-      override def execute(context: JobExecutionContext): Unit = ()
+  def apply(jobData: JobData): JobExecutionContext =
+    new JobExecutionContext {
+      def getJobDetail: JobDetail = JobDetailOps.toJobDetail(jobData)
+
+      def getScheduler: Scheduler             = ???
+      def getTrigger: Trigger                 = ???
+      def getCalendar: Calendar               = ???
+      def isRecovering: Boolean               = ???
+      def getRecoveringTriggerKey: TriggerKey = ???
+      def getRefireCount: Int                 = ???
+      def getMergedJobDataMap: JobDataMap     = ???
+      def getJobInstance: Job                 = ???
+      def getFireTime: Date                   = ???
+      def getScheduledFireTime: Date          = ???
+      def getPreviousFireTime: Date           = ???
+      def getNextFireTime: Date               = ???
+      def getFireInstanceId: String           = ???
+      def getResult: AnyRef                   = ???
+      def setResult(result: Any): Unit        = ???
+      def getJobRunTime: Long                 = ???
+      def put(key: Any, value: Any): Unit     = ???
+      def get(key: Any): AnyRef               = ???
     }
-    val firedBundle = new TriggerFiredBundle(jobDetail, null, null, false, null, null, null, null)
-    new JobExecutionContextImpl(null, firedBundle, job)
-  }
 }
