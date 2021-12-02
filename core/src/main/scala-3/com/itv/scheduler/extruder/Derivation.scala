@@ -37,14 +37,15 @@ private[extruder] trait DerivedJobDecoder[A] extends DerivedInstance[A] with Job
 private[extruder] trait DerivedJobDataEncoder[A] extends DerivedInstance[A] with JobDataEncoder[A] {
   protected[this] def elemEncoders: Array[JobDataEncoder[?]]
 
-  final def encodeWith(index: Int)(value: Any): Map[List[String], String] =
+  final def encodeWith(index: Int)(value: Any)(includeLabel: Boolean): Map[List[String], String] =
     elemEncoders(index).asInstanceOf[JobDataEncoder[Any]].apply(value).map { case (key, value) =>
-      (elemLabels(index) :: key, value)
+      if includeLabel then (elemLabels(index).toLowerCase :: key, value)
+      else (key, value)
     }
 
   final def encodedProduct(value: Product): Map[List[String], String] =
     value.productIterator.zipWithIndex.flatMap { case (v, idx) =>
-      encodeWith(idx)(v)
+      encodeWith(idx)(v)(includeLabel = true)
     }.toMap
 }
 
@@ -71,7 +72,7 @@ private[scheduler] trait DerivedEncoders extends PrimitiveEncoders {
   ): DerivedJobDataEncoder[A] = new DerivedJobDataEncoder[A]
     with DerivedInstance[A](
       constValue[A.MirroredLabel].toLowerCase,
-      Derivation.summonLabels[A.MirroredElemLabels].map(_.toLowerCase)
+      Derivation.summonLabels[A.MirroredElemLabels]
     ) {
     protected[this] def elemEncoders: Array[JobDataEncoder[?]] = Derivation.summonEncoders[A.MirroredElemTypes]
 
@@ -80,7 +81,8 @@ private[scheduler] trait DerivedEncoders extends PrimitiveEncoders {
         encodedProduct(a.asInstanceOf[Product]).map { case (key, value) =>
           (name :: key, value)
         }
-      case m: Mirror.SumOf[A] => encodeWith(m.ordinal(a))(a) + (List("type") -> name)
+      case m: Mirror.SumOf[A] =>
+        encodeWith(m.ordinal(a))(a)(includeLabel = false) + (List("type") -> elemLabels(m.ordinal(a)))
     }
   }
 }
@@ -121,7 +123,7 @@ private[scheduler] trait DerivedDecoders extends PrimitiveDecoders {
         jobData.value
           .collectFirst[String] {
             case (p, value) if p === path :+ "type" =>
-              value
+              value.toLowerCase
           }
           .map(findLabel)
           .getOrElse(-1) match {
