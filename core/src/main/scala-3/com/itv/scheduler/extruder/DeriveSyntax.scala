@@ -19,9 +19,9 @@ trait DeriveSyntax extends DerivedDecoders with DerivedEncoders {
       inline neEither: A <:!< Either[?, ?]
   ): JobDataEncoder[A] = derivedEncoder[A]
 
-  def deriveJobCodec[A](using ev1: DerivedJobDecoder[A], ev2: DerivedJobDataEncoder[A]): JobCodec[A] =
-    new JobCodec[A] {
-      def read(path: Chain[String], jobData: PartiallyDecodedJobData): Either[Throwable, A] = ev1.read(path, jobData)
-      def apply(a: A): Map[List[String], String]                                            = ev2.apply(a)
-    }
+  inline final def deriveJobCodec[A](using
+      inline A: Mirror.Of[A],
+      inline neOpt: A <:!< Option[?],
+      inline neEither: A <:!< Either[?, ?]
+  ): JobCodec[A] = JobCodec.from[A](deriveJobDecoder[A], derivedEncoder[A])
 }
