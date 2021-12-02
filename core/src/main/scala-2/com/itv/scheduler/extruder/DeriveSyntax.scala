@@ -6,7 +6,7 @@ import shapeless._
 
 trait DeriveSyntax {
   def deriveJobDecoder[A](implicit ev: Lazy[DerivedJobDecoder[A]]): JobDecoder[A] = ev.value
-  def deriveJobDataEncoder[A](implicit ev: Lazy[DerivedJobDataEncoder[A]]): JobDataEncoder[A] = ev.value
+  def deriveJobEncoder[A](implicit ev: Lazy[DerivedJobDataEncoder[A]]): JobDataEncoder[A] = ev.value
   def deriveJobCodec[A](implicit ev1: Lazy[DerivedJobDecoder[A]], ev2: Lazy[DerivedJobDataEncoder[A]]): JobCodec[A] =
     new JobCodec[A] {
       def read(path: Chain[String], jobData: PartiallyDecodedJobData): Either[Throwable, A] =

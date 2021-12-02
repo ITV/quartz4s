@@ -13,7 +13,7 @@ trait DeriveSyntax extends DerivedDecoders with DerivedEncoders {
       inline neOpt: A <:!< Option[?],
       inline neEither: A <:!< Either[?, ?]
   ): JobDecoder[A] = derivedDecoder[A]
-  inline final def deriveJobDataEncoder[A](using
+  inline final def deriveJobEncoder[A](using
       inline A: Mirror.Of[A],
       inline neOpt: A <:!< Option[?],
       inline neEither: A <:!< Either[?, ?]
