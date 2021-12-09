@@ -1,16 +1,16 @@
-import sbt._
-import ReleaseTransformations._
+import sbt.*
+import ReleaseTransformations.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
-val commonSettings: Seq[Setting[_]] = Seq(
+val commonSettings: Seq[Setting[?]] = Seq(
   libraryDependencies ++= Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   ).filterNot(_ => scalaVersion.value.startsWith("3.")),
   scalacOptions ++= {
-    if (scalaVersion.value.startsWith("3.")) Nil
+    if scalaVersion.value.startsWith("3.") then Nil
     else Seq("-Ytasty-reader", "-Xsource:3", """-Wconf:msg=package object inheritance is deprecated:i""")
   },
   scmInfo := Some(
@@ -21,7 +21,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   ),
   organization                              := "com.itv",
   organizationName                          := "ITV",
-  scalaVersion                              := "3.0.2",
+  scalaVersion                              := "3.1.0",
   crossScalaVersions                        := Seq("2.13.6", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
@@ -79,7 +79,7 @@ lazy val core = createProject("core")
         .cross(CrossVersion.for3Use2_13),
       "org.typelevel" %% "discipline-munit" % Versions.disciplineMunit % Test,
     ) ++ {
-      if (scalaVersion.value.startsWith("3.")) {
+      if scalaVersion.value.startsWith("3.") then {
         Seq(
           "org.typelevel" %% "shapeless3-deriving" % Versions.shapeless3,
         )
