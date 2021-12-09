@@ -2,7 +2,7 @@ package com.itv.scheduler
 
 import org.quartz.{JobDataMap, JobKey}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 trait QuartzOps {
   implicit class JobDataMapOps(jobDataMap: JobDataMap) {
