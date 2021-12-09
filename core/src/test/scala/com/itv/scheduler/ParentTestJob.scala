@@ -1,7 +1,7 @@
 package com.itv.scheduler
 
 import cats.Eq
-import extruder.semiauto._
+import com.itv.scheduler.extruder.semiauto.*
 
 sealed trait ParentTestJob
 case class UserJob(id: UserId) extends ParentTestJob

@@ -2,18 +2,18 @@ package com.itv.scheduler
 
 import java.util.Properties
 
-import org.quartz.impl.StdSchedulerFactory._
-import org.quartz.utils.PoolingConnectionProvider._
+import org.quartz.impl.StdSchedulerFactory.*
+import org.quartz.utils.PoolingConnectionProvider.*
 
 final case class JobStoreConfig(
     isClustered: Boolean = JobStoreConfig.Defaults.isClustered,
-    jobStoreClass: Class[_] = JobStoreConfig.Defaults.jobStoreClass,
-    driverDelegateClass: Class[_]
+    jobStoreClass: Class[?] = JobStoreConfig.Defaults.jobStoreClass,
+    driverDelegateClass: Class[?]
 )
 object JobStoreConfig {
   object Defaults {
     val isClustered: Boolean    = true
-    val jobStoreClass: Class[_] = classOf[org.quartz.impl.jdbcjobstore.JobStoreTX]
+    val jobStoreClass: Class[?] = classOf[org.quartz.impl.jdbcjobstore.JobStoreTX]
   }
 }
 
@@ -24,7 +24,7 @@ final case class ThreadPoolConfig(
 final case class DataSourceConfig(
     dataSourceName: String = DataSourceConfig.Defaults.dataSourceName,
     provider: String = DataSourceConfig.Defaults.providerName,
-    driverClass: Class[_],
+    driverClass: Class[?],
     jdbcUrl: String,
     username: String,
     password: String,

@@ -2,15 +2,15 @@ package com.itv.scheduler
 
 import java.time.Instant
 import java.util.Date
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import cats.Apply
-import com.itv.scheduler.QuartzOps._
-import org.quartz.CronScheduleBuilder._
-import org.quartz.SimpleScheduleBuilder._
-import org.quartz.JobBuilder._
-import org.quartz.TriggerBuilder._
-import org.quartz._
+import com.itv.scheduler.QuartzOps.*
+import org.quartz.CronScheduleBuilder.*
+import org.quartz.SimpleScheduleBuilder.*
+import org.quartz.JobBuilder.*
+import org.quartz.TriggerBuilder.*
+import org.quartz.*
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.impl.matchers.GroupMatcher
 
