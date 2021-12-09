@@ -1,20 +1,14 @@
 package com.itv.scheduler
 
-import org.quartz.{JobDetail, JobExecutionContext}
-import cats.implicits._
-import org.scalamock.scalatest.MockFactory
+import cats.implicits.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import QuartzOps._
 
-class JobDecoderTest extends AnyFlatSpec with Matchers with MockFactory {
+class JobDecoderTest extends AnyFlatSpec with Matchers {
   behavior of "JobDecoder"
 
   def decodeMap[A: JobDecoder](map: Map[String, String]): A = {
-    val jobExecutionContext = stub[JobExecutionContext]
-    val jobDetail           = stub[JobDetail]
-    (jobExecutionContext.getJobDetail _).when().returns(jobDetail)
-    (jobDetail.getJobDataMap _).when().returns(JobData(map).toJobDataMap)
+    val jobExecutionContext = MockJobExecutionContext(JobData(map))
     JobDecoder[A].decode(jobExecutionContext).valueOr(error => fail(s"Could not decode map due to: $error"))
   }
 

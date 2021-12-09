@@ -1,10 +1,10 @@
 package com.itv.scheduler
 
 import cats.MonadThrow
-import cats.effect._
+import cats.effect.*
 import cats.effect.std.Dispatcher
-import cats.syntax.all._
-import org.quartz._
+import cats.syntax.all.*
+import org.quartz.*
 
 import scala.util.Either
 

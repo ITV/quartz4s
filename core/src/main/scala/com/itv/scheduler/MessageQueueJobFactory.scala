@@ -1,10 +1,10 @@
 package com.itv.scheduler
 
 import cats.MonadThrow
-import cats.effect._
+import cats.effect.*
 import cats.effect.kernel.Resource.ExitCase
 import cats.effect.std.{Dispatcher, Queue}
-import cats.syntax.all._
+import cats.syntax.all.*
 import org.quartz.{Job, Scheduler}
 import org.quartz.simpl.PropertySettingJobFactory
 import org.quartz.spi.TriggerFiredBundle
