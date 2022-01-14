@@ -1,13 +1,10 @@
 package com.itv.scheduler
 
-import java.time.Instant
-import java.util.Properties
 import cats.effect.*
 import cats.effect.std.Queue
 import cats.effect.unsafe.IORuntime
 import cats.syntax.all.*
 import com.dimafeng.testcontainers.*
-import com.dimafeng.testcontainers.PostgreSQLContainer.defaultDockerImageName
 import org.flywaydb.core.Flyway
 import org.quartz.{CronExpression, JobKey, TriggerKey}
 import org.scalatest.BeforeAndAfterEach
@@ -15,6 +12,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.testcontainers.utility.DockerImageName
 
+import java.time.Instant
+import java.util.Properties
 import scala.concurrent.duration.*
 
 class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestContainer with BeforeAndAfterEach {
