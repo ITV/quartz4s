@@ -63,7 +63,6 @@ lazy val core = createProject("core")
     libraryDependencies ++= Seq(
       "org.quartz-scheduler"    % "quartz"                  % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"          %% "cats-effect"             % Versions.catsEffect,
-      "org.scala-lang.modules" %% "scala-collection-compat" % Versions.collectionCompat,
       "org.scalatest"          %% "scalatest"               % Versions.scalatest           % Test,
       "org.scalatestplus"      %% "scalacheck-1-15"         % Versions.scalatestScalacheck % Test,
       "org.scalameta"          %% "munit"                   % Versions.munit               % Test,
@@ -73,11 +72,9 @@ lazy val core = createProject("core")
       "com.zaxxer"     % "HikariCP"                        % Versions.hikari         % Test,
       "org.flywaydb"   % "flyway-core"                     % Versions.flyway         % Test,
       "ch.qos.logback" % "logback-classic"                 % Versions.logback        % Test,
-      ("org.scalamock" %% "scalamock" % Versions.scalamock % Test).cross(CrossVersion.for3Use2_13),
-      "org.typelevel"  %% "cats-laws" % Versions.cats      % Test,
-      ("com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless % Test)
-        .cross(CrossVersion.for3Use2_13),
-      "org.typelevel" %% "discipline-munit" % Versions.disciplineMunit % Test,
+      ("org.scalamock" %% "scalamock"        % Versions.scalamock       % Test).cross(CrossVersion.for3Use2_13),
+      "org.typelevel"  %% "cats-laws"        % Versions.cats            % Test,
+      "org.typelevel"  %% "discipline-munit" % Versions.disciplineMunit % Test,
     ) ++ {
       if (scalaVersion.value.startsWith("3.")) {
         Seq(
@@ -85,7 +82,8 @@ lazy val core = createProject("core")
         )
       } else {
         Seq(
-          "com.chuusai" %% "shapeless" % Versions.shapeless2,
+          "com.chuusai"                %% "shapeless"                 % Versions.shapeless2,
+          "com.github.alexarchambault" %% "scalacheck-shapeless_1.15" % Versions.scalacheckShapeless % Test
         )
       }
     },

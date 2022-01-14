@@ -58,7 +58,7 @@ class QuartzTaskScheduler[F[_], J](
       jobTimeSchedule: JobTimeSchedule
   ): F[Option[Instant]] =
     F.blocking {
-      val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[_ <: Trigger] = jobTimeSchedule match {
+      val triggerUpdate: TriggerBuilder[Trigger] => TriggerBuilder[? <: Trigger] = jobTimeSchedule match {
         case CronScheduledJob(cronExpression) => _.withSchedule(cronSchedule(cronExpression))
         case JobScheduledAt(runTime)          => _.startAt(Date.from(runTime))
         case SimpleJob(repeatEvery) => _.withSchedule(repeatSecondlyForever(repeatEvery.toSeconds.toInt.max(1)))

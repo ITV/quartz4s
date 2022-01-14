@@ -15,10 +15,8 @@ trait CallbackJobFactory extends PropertySettingJobFactory {
   def createCallbackJob: PublishCallbackJob
 
   override def newJob(bundle: TriggerFiredBundle, scheduler: Scheduler): Job =
-    if (classOf[PublishCallbackJob].isAssignableFrom(bundle.getJobDetail.getJobClass))
-      createCallbackJob
-    else
-      super.newJob(bundle, scheduler)
+    if classOf[PublishCallbackJob].isAssignableFrom(bundle.getJobDetail.getJobClass) then createCallbackJob
+    else super.newJob(bundle, scheduler)
 }
 
 trait MessageQueueJobFactory[F[_], A] extends CallbackJobFactory {
