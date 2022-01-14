@@ -1,6 +1,6 @@
 package com.itv.scheduler
 
-import org.scalacheck._
+import org.scalacheck.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
