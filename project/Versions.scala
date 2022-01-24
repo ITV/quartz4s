@@ -10,7 +10,7 @@ object Versions {
   val quartz              = "2.3.2"
   val scalatest           = "3.2.10"
   val scalacheckShapeless = "1.3.0"
-  val scalatestScalacheck = "3.2.10.0"
+  val scalatestScalacheck = "3.2.11.0"
   val scalamock           = "5.2.0"
   val shapeless2          = "2.3.7"
   val shapeless3          = "3.0.3"
