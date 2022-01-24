@@ -8,7 +8,7 @@ object Versions {
   val munit               = "0.7.29"
   val postgresql          = "42.3.1"
   val quartz              = "2.3.2"
-  val scalatest           = "3.2.10"
+  val scalatest           = "3.2.11"
   val scalacheckShapeless = "1.3.0"
   val scalatestScalacheck = "3.2.10.0"
   val scalamock           = "5.2.0"
