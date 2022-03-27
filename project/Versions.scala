@@ -12,7 +12,7 @@ object Versions {
   val scalacheckShapeless = "1.3.0"
   val scalatestScalacheck = "3.2.10.0"
   val scalamock           = "5.2.0"
-  val shapeless2          = "2.3.7"
+  val shapeless2          = "2.3.9"
   val shapeless3          = "3.0.3"
   val testContainers      = "0.39.12"
 }
