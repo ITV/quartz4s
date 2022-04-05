@@ -1,6 +1,6 @@
 object Versions {
   val cats                = "2.7.0"
-  val catsEffect          = "3.3.4"
+  val catsEffect          = "3.3.11"
   val disciplineMunit     = "1.0.9"
   val flyway              = "8.4.1"
   val hikari              = "5.0.1"
