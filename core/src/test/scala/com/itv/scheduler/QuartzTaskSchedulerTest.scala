@@ -93,8 +93,8 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
             JobScheduledAt(Instant.now().plusSeconds(2))
           )
 
-          exists      <- scheduler.checkExists(TriggerKey.triggerKey("sample-job"))
-          nonexistent <- scheduler.checkExists(TriggerKey.triggerKey("non-job"))
+          exists      <- scheduler.checkExists(TriggerKey.triggerKey("sample-trigger"))
+          nonexistent <- scheduler.checkExists(TriggerKey.triggerKey("non-trigger"))
 
         } yield {
           exists shouldBe true
