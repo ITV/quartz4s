@@ -24,6 +24,10 @@ trait TaskScheduler[F[_], J] {
     createJob(jobKey, job) *>
       scheduleTrigger(jobKey, triggerKey, jobTimeSchedule)
 
+  def checkExists(jobKey: JobKey): F[Boolean]
+
+  def checkExists(triggerKey: TriggerKey): F[Boolean]
+
   def createJob(jobKey: JobKey, job: J): F[Unit]
 
   def scheduleTrigger(jobKey: JobKey, triggerKey: TriggerKey, jobTimeSchedule: JobTimeSchedule): F[Option[Instant]]
@@ -39,6 +43,9 @@ class QuartzTaskScheduler[F[_], J](
     scheduler: Scheduler
 )(implicit F: Sync[F], jobDataEncoder: JobDataEncoder[J])
     extends TaskScheduler[F, J] {
+
+  override def checkExists(jobKey: JobKey): F[Boolean]         = F.blocking(scheduler.checkExists(jobKey))
+  override def checkExists(triggerKey: TriggerKey): F[Boolean] = F.blocking(scheduler.checkExists(triggerKey))
 
   override def createJob(jobKey: JobKey, job: J): F[Unit] =
     F.blocking {

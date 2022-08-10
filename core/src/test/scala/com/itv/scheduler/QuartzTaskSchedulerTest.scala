@@ -56,6 +56,56 @@ class QuartzTaskSchedulerTest extends AnyFlatSpec with Matchers with ForAllTestC
       QuartzTaskScheduler[IO, ParentTestJob](quartzProperties, jobFactory)
     }
 
+  it should "support job idempotency checks" in {
+    (for {
+      queue <- Queue.unbounded[IO, ParentTestJob]
+      _ <- schedulerResource(messageQueue = queue).use { scheduler =>
+        for {
+          _ <- scheduler.scheduleJob(
+            JobKey.jobKey("sample-job"),
+            ChildObjectJob,
+            TriggerKey.triggerKey("sample-trigger"),
+            JobScheduledAt(Instant.now().plusSeconds(2))
+          )
+
+          exists      <- scheduler.checkExists(JobKey.jobKey("sample-job"))
+          nonexistent <- scheduler.checkExists(JobKey.jobKey("non-job"))
+
+        } yield {
+          exists shouldBe true
+          nonexistent shouldBe false
+        }
+      }
+    } yield ())
+      .timeout(5.seconds)
+      .unsafeRunSync()
+  }
+
+  it should "support trigger idempotency checks" in {
+    (for {
+      queue <- Queue.unbounded[IO, ParentTestJob]
+      _ <- schedulerResource(messageQueue = queue).use { scheduler =>
+        for {
+          _ <- scheduler.scheduleJob(
+            JobKey.jobKey("sample-job"),
+            ChildObjectJob,
+            TriggerKey.triggerKey("sample-trigger"),
+            JobScheduledAt(Instant.now().plusSeconds(2))
+          )
+
+          exists      <- scheduler.checkExists(TriggerKey.triggerKey("sample-job"))
+          nonexistent <- scheduler.checkExists(TriggerKey.triggerKey("non-job"))
+
+        } yield {
+          exists shouldBe true
+          nonexistent shouldBe false
+        }
+      }
+    } yield ())
+      .timeout(5.seconds)
+      .unsafeRunSync()
+  }
+
   it should "schedule jobs to run every second" in {
     val elementCount = 6
     val userJob      = UserJob(UserId("user-id-123"))
