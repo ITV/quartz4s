@@ -69,9 +69,6 @@ def createProject(projectName: String): Project =
 lazy val root = (project in file("."))
   .aggregate(core, docs)
   .settings(commonSettings)
-  .settings(
-    publish / skip := true,
-  )
 
 lazy val core = createProject("core")
   .settings(
@@ -109,7 +106,6 @@ lazy val docs = project
   .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
-    publish / skip := true,
     mdocOut        := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "QUARTZ4S_VERSION" -> version.value
@@ -131,8 +127,6 @@ releaseProcess := Seq[ReleaseStep](
   runTest,
   setReleaseVersion,
   commitReleaseVersion,
-//  releaseStepInputTask(MdocPlugin.autoImport.mdoc),
-//  ReleaseMdocStateTransformations.commitMdoc,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
   releaseStepCommand("sonatypeBundleRelease"),
