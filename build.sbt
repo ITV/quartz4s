@@ -69,9 +69,11 @@ def createProject(projectName: String): Project =
 lazy val root = (project in file("."))
   .aggregate(core, docs)
   .settings(commonSettings)
+  .settings(publish / skip := true)
 
 lazy val core = createProject("core")
   .settings(
+    ThisBuild / packageDoc / publishArtifact := true,
     libraryDependencies ++= Seq(
       "org.quartz-scheduler"    % "quartz"                  % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"          %% "cats-effect"             % Versions.catsEffect,
@@ -106,6 +108,7 @@ lazy val docs = project
   .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
+    publish / skip := true,
     mdocOut        := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "QUARTZ4S_VERSION" -> version.value
@@ -113,7 +116,7 @@ lazy val docs = project
     releaseProcess := Seq[ReleaseStep](
       ReleasePlugin.autoImport.releaseStepInputTask(MdocPlugin.autoImport.mdoc),
       ReleaseMdocStateTransformations.commitMdoc,
-    ),
+    )
   )
   .dependsOn(core)
 
