@@ -13,6 +13,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
     if (scalaVersion.value.startsWith("3.")) Nil
     else Seq("-Ytasty-reader", "-Xsource:3", """-Wconf:msg=package object inheritance is deprecated:i""")
   },
+  Test / packageDoc / publishArtifact := false,
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/ITV/quartz4s"),
@@ -73,7 +74,8 @@ lazy val root = (project in file("."))
 
 lazy val core = createProject("core")
   .settings(
-    ThisBuild / packageDoc / publishArtifact := true,
+    Compile / packageDoc / publishArtifact := true,
+    Test / packageDoc / publishArtifact := true,
     libraryDependencies ++= Seq(
       "org.quartz-scheduler"    % "quartz"                  % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
       "org.typelevel"          %% "cats-effect"             % Versions.catsEffect,
@@ -109,6 +111,7 @@ lazy val docs = project
   .settings(commonSettings)
   .settings(
     publish / skip := true,
+    Compile / packageDoc / publishArtifact := false,
     mdocOut        := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "QUARTZ4S_VERSION" -> version.value
