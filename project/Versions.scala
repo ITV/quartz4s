@@ -1,5 +1,5 @@
 object Versions {
-  val cats                = "2.8.0"
+  val cats                = "2.7.0"
   val catsEffect          = "3.3.4"
   val disciplineMunit     = "1.0.9"
   val flyway              = "8.5.13"
