@@ -2,7 +2,7 @@ object Versions {
   val cats                = "2.7.0"
   val catsEffect          = "3.3.14"
   val disciplineMunit     = "1.0.9"
-  val flyway              = "8.4.4"
+  val flyway              = "8.5.13"
   val hikari              = "5.0.1"
   val logback             = "1.2.11"
   val munit               = "0.7.29"
