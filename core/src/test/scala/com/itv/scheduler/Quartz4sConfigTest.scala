@@ -46,7 +46,7 @@ class Quartz4sConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDriven
         "org.quartz.dataSource.ds.password"       -> password,
         "org.quartz.dataSource.ds.maxConnections" -> maxConnections.toString,
       )
-      quartzConfig.toPropertiesMap should contain theSameElementsAs expectedProperties
+      quartzConfig.defaultProperties should contain theSameElementsAs expectedProperties
     }
   }
 }

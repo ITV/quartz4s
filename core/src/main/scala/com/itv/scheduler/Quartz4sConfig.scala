@@ -42,7 +42,7 @@ final case class Quartz4sConfig(
     threadPool: ThreadPoolConfig,
     dataSource: DataSourceConfig,
 ) {
-  private[scheduler] def toPropertiesMap: Map[String, String] = {
+  private[scheduler] def defaultProperties: Map[String, String] = {
     val dataSourcePropPrefix = s"$PROP_DATASOURCE_PREFIX.${dataSource.dataSourceName}"
     Map(
       PROP_JOB_STORE_CLASS                          -> jobStore.jobStoreClass.getName,
@@ -59,10 +59,18 @@ final case class Quartz4sConfig(
     )
   }
 
+  /** sets the default scheduler properties */
   def toQuartzProperties: QuartzProperties = {
-    val propMap = toPropertiesMap
     val props   = new Properties()
-    propMap.foreach { case (k, v) => props.setProperty(k, v) }
+    defaultProperties.foreach { case (k, v) => props.setProperty(k, v) }
+    QuartzProperties(props)
+  }
+
+  /** sets the default scheduler properties allowing client code to specify additional properties.
+   * Note: additional properties will replace any existing property with a matching key */
+  def toQuartzProperties(additionalProperties: Map[String, String]): QuartzProperties = {
+    val props   = new Properties()
+    (defaultProperties ++ additionalProperties).foreach { case (k, v) => props.setProperty(k, v) }
     QuartzProperties(props)
   }
 }
