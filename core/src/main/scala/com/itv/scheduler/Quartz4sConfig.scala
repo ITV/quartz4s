@@ -61,9 +61,13 @@ final case class Quartz4sConfig(
 
   /** sets the default scheduler properties */
   def toQuartzProperties: QuartzProperties = {
-    val props   = new Properties()
-    defaultProperties.foreach { case (k, v) => props.setProperty(k, v) }
-    QuartzProperties(props)
+    toQuartzProperties(Map.empty[String, String])
+  }
+
+  /** sets the default scheduler properties allowing client code to specify additional properties.
+   * Note: additional properties will replace any existing property with a matching key */
+  def toQuartzProperties(additionalProperties: (String, String)*): QuartzProperties = {
+    toQuartzProperties(additionalProperties.toMap)
   }
 
   /** sets the default scheduler properties allowing client code to specify additional properties.
