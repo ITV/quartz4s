@@ -49,4 +49,34 @@ class Quartz4sConfigTest extends AnyFlatSpec with Matchers with ScalaCheckDriven
       quartzConfig.defaultProperties should contain theSameElementsAs expectedProperties
     }
   }
+
+  it should "set additional properties overriding default props with a matching key" in {
+    forAll(
+      Gen.posNum[Int],
+      Gen.posNum[Int],
+      sizedStringGen,
+      sizedStringGen,
+      sizedStringGen,
+    ) { case (threadCount, maxConnections, jdbcUrl, username, password) =>
+      val quartzConfig = Quartz4sConfig(
+        JobStoreConfig(
+          driverDelegateClass = classOf[org.quartz.impl.jdbcjobstore.PostgreSQLDelegate],
+        ),
+        ThreadPoolConfig(threadCount),
+        DataSourceConfig(
+          driverClass = classOf[org.postgresql.Driver],
+          jdbcUrl = jdbcUrl,
+          username = username,
+          password = password,
+          maxConnections = maxConnections,
+        )
+      )
+
+      val additionalProperties: Map[String, String] = Map(
+        "org.quartz.jobStore.isClustered" -> "false"
+      )
+
+      quartzConfig.toQuartzProperties(additionalProperties).properties.get("org.quartz.jobStore.isClustered") should be ("false")
+    }
+  }
 }
