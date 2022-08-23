@@ -50,6 +50,12 @@ val commonSettings: Seq[Setting[_]] = Seq(
         <organization>ITV</organization>
         <organizationUrl>http://www.itv.com</organizationUrl>
       </developer>
+      <developer>
+        <id>Angel-O</id>
+        <name>Angelo Oparah</name>
+        <organization>ITV</organization>
+        <organizationUrl>http://www.itv.com</organizationUrl>
+      </developer>
     </developers>,
   credentials ++= {
     sys.env
