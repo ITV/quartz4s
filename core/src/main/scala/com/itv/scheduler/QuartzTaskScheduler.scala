@@ -91,7 +91,7 @@ class QuartzTaskScheduler[F[_], J](
   override def rescheduleJob(triggerKey: TriggerKey, trigger: Trigger): F[Unit] =
     F.blocking {
       scheduler.rescheduleJob(triggerKey, trigger)
-    }
+    }.void
 
   override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
     F.blocking {
