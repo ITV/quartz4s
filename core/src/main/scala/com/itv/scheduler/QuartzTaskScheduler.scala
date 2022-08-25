@@ -37,6 +37,8 @@ trait TaskScheduler[F[_], J] {
   def pauseTrigger(triggerKey: TriggerKey): F[Unit]
 
   def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]]
+
+  def rescheduleJob(triggerKey: TriggerKey, trigger: Trigger): F[Unit]
 }
 
 class QuartzTaskScheduler[F[_], J](
@@ -84,6 +86,11 @@ class QuartzTaskScheduler[F[_], J](
   override def pauseTrigger(triggerKey: TriggerKey): F[Unit] =
     F.blocking {
       scheduler.pauseTrigger(triggerKey)
+    }
+
+  override def rescheduleJob(triggerKey: TriggerKey, trigger: Trigger): F[Unit] =
+    F.blocking {
+      scheduler.rescheduleJob(triggerKey, trigger)
     }
 
   override def getJobKeys(matcher: GroupMatcher[JobKey]): F[List[JobKey]] =
