@@ -1,16 +1,16 @@
-import sbt._
-import ReleaseTransformations._
+import sbt.*
+import ReleaseTransformations.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / bloopExportJarClassifiers := Some(Set("sources"))
 
-val commonSettings: Seq[Setting[_]] = Seq(
+val commonSettings: Seq[Setting[?]] = Seq(
   libraryDependencies ++= Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   ).filterNot(_ => scalaVersion.value.startsWith("3.")),
   scalacOptions ++= {
-    if (scalaVersion.value.startsWith("3.")) Nil
+    if scalaVersion.value.startsWith("3.") then Nil
     else Seq("-Ytasty-reader", "-Xsource:3", """-Wconf:msg=package object inheritance is deprecated:i""")
   },
   Test / packageDoc / publishArtifact := false,
@@ -23,13 +23,13 @@ val commonSettings: Seq[Setting[_]] = Seq(
   organization                              := "com.itv",
   organizationName                          := "ITV",
   scalaVersion                              := "3.1.3",
-  crossScalaVersions                        := Seq("2.13.8", scalaVersion.value),
+  crossScalaVersions                        := Seq("2.13.10", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("http://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / publishTo                     := sonatypePublishToBundle.value,
   ThisBuild / pomIncludeRepository          := { _ => false },
   publishMavenStyle                         := true,
-  pomExtra                                  :=
+  pomExtra :=
     <url>https://github.com/ITV/quartz4s</url>
     <developers>
       <developer>
@@ -75,13 +75,13 @@ lazy val root = (project in file("."))
 lazy val core = createProject("core")
   .settings(
     Compile / packageDoc / publishArtifact := true,
-    Test / packageDoc / publishArtifact := true,
+    Test / packageDoc / publishArtifact    := true,
     libraryDependencies ++= Seq(
-      "org.quartz-scheduler"    % "quartz"                  % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
-      "org.typelevel"          %% "cats-effect"             % Versions.catsEffect,
-      "org.scalatest"          %% "scalatest"               % Versions.scalatest           % Test,
-      "org.scalatestplus"      %% "scalacheck-1-15"         % Versions.scalatestScalacheck % Test,
-      "org.scalameta"          %% "munit"                   % Versions.munit               % Test,
+      "org.quartz-scheduler" % "quartz"          % Versions.quartz exclude ("com.zaxxer", "HikariCP-java7"),
+      "org.typelevel"       %% "cats-effect"     % Versions.catsEffect,
+      "org.scalatest"       %% "scalatest"       % Versions.scalatest           % Test,
+      "org.scalatestplus"   %% "scalacheck-1-15" % Versions.scalatestScalacheck % Test,
+      "org.scalameta"       %% "munit"           % Versions.munit               % Test,
       "com.dimafeng"  %% "testcontainers-scala-scalatest"  % Versions.testContainers % Test,
       "com.dimafeng"  %% "testcontainers-scala-postgresql" % Versions.testContainers % Test,
       "org.postgresql" % "postgresql"                      % Versions.postgresql     % Test,
@@ -92,7 +92,7 @@ lazy val core = createProject("core")
       "org.typelevel"  %% "cats-laws"        % Versions.cats            % Test,
       "org.typelevel"  %% "discipline-munit" % Versions.disciplineMunit % Test,
     ) ++ {
-      if (scalaVersion.value.startsWith("3.")) {
+      if scalaVersion.value.startsWith("3.") then {
         Seq(
           "org.typelevel" %% "shapeless3-deriving" % Versions.shapeless3,
         )
@@ -110,9 +110,9 @@ lazy val docs = project
   .enablePlugins(MdocPlugin)
   .settings(commonSettings)
   .settings(
-    publish / skip := true,
+    publish / skip                         := true,
     Compile / packageDoc / publishArtifact := false,
-    mdocOut        := (ThisBuild / baseDirectory).value,
+    mdocOut                                := (ThisBuild / baseDirectory).value,
     mdocVariables := Map(
       "QUARTZ4S_VERSION" -> version.value
     ),
