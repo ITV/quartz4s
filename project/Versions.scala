@@ -4,7 +4,7 @@ object Versions {
   val disciplineMunit     = "1.0.9"
   val flyway              = "8.4.4"
   val hikari              = "5.0.1"
-  val logback             = "1.2.11"
+  val logback             = "1.4.4"
   val munit               = "0.7.29"
   val postgresql          = "42.3.6"
   val quartz              = "2.3.2"
