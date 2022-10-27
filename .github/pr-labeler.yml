@@ -1,1 +1,1 @@
-dependency-update: ['scala-steward:update/*']
+dependency-update: ['scala-steward:update/*', 'update/*]
