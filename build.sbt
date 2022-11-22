@@ -3,8 +3,6 @@ import ReleaseTransformations.*
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-Global / bloopExportJarClassifiers := Some(Set("sources"))
-
 val commonSettings: Seq[Setting[?]] = Seq(
   libraryDependencies ++= Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
