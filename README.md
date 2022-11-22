@@ -4,7 +4,7 @@ Quarts scheduler library using cats-effect queues for handling results.
 ### Import
 ```scala
 libraryDependencies ++= Seq(
-  "com.itv" %% "quartz4s-core"     % "1.0.2-SNAPSHOT",
+  "com.itv" %% "quartz4s-core"     % "1.0.5+12-d29e6643-SNAPSHOT",
 )
 ```
 
@@ -56,19 +56,19 @@ import cats.effect.std.Queue
 import cats.effect.unsafe.implicits.global
 
 val jobMessageQueue = Queue.unbounded[IO, ParentJob].unsafeRunSync()
-// jobMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], ParentJob] = cats.effect.std.Queue$BoundedQueue@35945402
+// jobMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], ParentJob] = cats.effect.std.Queue$BoundedQueue@461ee05a
 val autoAckJobFactory = MessageQueueJobFactory.autoAcking[IO, ParentJob](jobMessageQueue)
 // autoAckJobFactory: Resource[[A >: Nothing <: Any] => IO[A], AutoAckingQueueJobFactory[[A >: Nothing <: Any] => IO[A], ParentJob]] = Bind(
 //   source = Bind(
 //     source = Bind(
 //       source = Allocate(
-//         resource = cats.effect.kernel.Resource$$$Lambda$15983/0x00000008045ec840@3e8cd737
+//         resource = cats.effect.kernel.Resource$$$Lambda$15134/0x0000000804148840@7bb872ea
 //       ),
-//       fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@78afe2d1
+//       fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@4c3acfdb
 //     ),
-//     fs = cats.effect.std.Dispatcher$$$Lambda$15986/0x00000008045f8840@4feba356
+//     fs = cats.effect.std.Dispatcher$$$Lambda$15137/0x000000080414b040@89f3d7e
 //   ),
-//   fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@6505bea0
+//   fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@5de0523b
 // )
 ```
 
@@ -85,38 +85,38 @@ In both cases, the quartz job is only marked as complete once the `acker.complet
 ```scala
 // each message is wrapped as a `Resource` which acks on completion
 val ackableJobResourceMessageQueue = Queue.unbounded[IO, Resource[IO, ParentJob]].unsafeRunSync()
-// ackableJobResourceMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], Resource[[A >: Nothing <: Any] => IO[A], ParentJob]] = cats.effect.std.Queue$BoundedQueue@419f7c5b
+// ackableJobResourceMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], Resource[[A >: Nothing <: Any] => IO[A], ParentJob]] = cats.effect.std.Queue$BoundedQueue@12b71557
 val ackingResourceJobFactory: Resource[IO, AckingQueueJobFactory[IO, Resource, ParentJob]] =
   MessageQueueJobFactory.ackingResource(ackableJobResourceMessageQueue)
 // ackingResourceJobFactory: Resource[[A >: Nothing <: Any] => IO[A], AckingQueueJobFactory[[A >: Nothing <: Any] => IO[A], Resource, ParentJob]] = Bind(
 //   source = Bind(
 //     source = Bind(
 //       source = Allocate(
-//         resource = cats.effect.kernel.Resource$$$Lambda$15983/0x00000008045ec840@4621a7d3
+//         resource = cats.effect.kernel.Resource$$$Lambda$15134/0x0000000804148840@86954cd
 //       ),
-//       fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@54c24d52
+//       fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@796cec73
 //     ),
-//     fs = cats.effect.std.Dispatcher$$$Lambda$15986/0x00000008045f8840@1cfa09d4
+//     fs = cats.effect.std.Dispatcher$$$Lambda$15137/0x000000080414b040@264218ef
 //   ),
-//   fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@263dc3b4
+//   fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@c75acdd
 // )
 
 // each message is wrapped as a `AckableMessage` which acks on completion
 val ackableJobMessageQueue = Queue.unbounded[IO, AckableMessage[IO, ParentJob]].unsafeRunSync()
-// ackableJobMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], AckableMessage[[A >: Nothing <: Any] => IO[A], ParentJob]] = cats.effect.std.Queue$BoundedQueue@6d69e79f
+// ackableJobMessageQueue: Queue[[A >: Nothing <: Any] => IO[A], AckableMessage[[A >: Nothing <: Any] => IO[A], ParentJob]] = cats.effect.std.Queue$BoundedQueue@4ef85ea2
 val ackingJobFactory: Resource[IO, AckingQueueJobFactory[IO, AckableMessage, ParentJob]] =
   MessageQueueJobFactory.acking(ackableJobMessageQueue)
 // ackingJobFactory: Resource[[A >: Nothing <: Any] => IO[A], AckingQueueJobFactory[[A >: Nothing <: Any] => IO[A], [F >: Nothing <: [_$3 >: Nothing <: Any] => Any, A >: Nothing <: Any] => AckableMessage[F, A], ParentJob]] = Bind(
 //   source = Bind(
 //     source = Bind(
 //       source = Allocate(
-//         resource = cats.effect.kernel.Resource$$$Lambda$15983/0x00000008045ec840@2b879fbd
+//         resource = cats.effect.kernel.Resource$$$Lambda$15134/0x0000000804148840@50e92c7a
 //       ),
-//       fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@677f87b0
+//       fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@665ac3e8
 //     ),
-//     fs = cats.effect.std.Dispatcher$$$Lambda$15986/0x00000008045f8840@2f97c888
+//     fs = cats.effect.std.Dispatcher$$$Lambda$15137/0x000000080414b040@47e898ba
 //   ),
-//   fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@de097fa
+//   fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@4b69c3ab
 // )
 ```
 
@@ -133,15 +133,15 @@ val schedulerResource: Resource[IO, QuartzTaskScheduler[IO, ParentJob]] =
 //     source = Bind(
 //       source = Bind(
 //         source = Allocate(
-//           resource = cats.effect.kernel.Resource$$$Lambda$15983/0x00000008045ec840@3e8cd737
+//           resource = cats.effect.kernel.Resource$$$Lambda$15134/0x0000000804148840@7bb872ea
 //         ),
-//         fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@78afe2d1
+//         fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@4c3acfdb
 //       ),
-//       fs = cats.effect.std.Dispatcher$$$Lambda$15986/0x00000008045f8840@4feba356
+//       fs = cats.effect.std.Dispatcher$$$Lambda$15137/0x000000080414b040@89f3d7e
 //     ),
-//     fs = cats.effect.kernel.Resource$$Lambda$15985/0x00000008045eb040@6505bea0
+//     fs = cats.effect.kernel.Resource$$Lambda$15136/0x000000080414a040@5de0523b
 //   ),
-//   fs = repl.MdocSession$MdocApp$$Lambda$15990/0x00000008045fe840@17c372d9
+//   fs = repl.MdocSession$MdocApp$$Lambda$15141/0x000000080414e840@43998d42
 // )
 ```
 

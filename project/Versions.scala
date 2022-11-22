@@ -1,5 +1,5 @@
 object Versions {
-  val cats                = "2.7.0"
+  val cats                = "2.8.0"
   val catsEffect          = "3.3.14"
   val disciplineMunit     = "1.0.9"
   val flyway              = "8.5.13"
@@ -10,9 +10,9 @@ object Versions {
   val quartz              = "2.3.2"
   val scalatest           = "3.2.14"
   val scalacheckShapeless = "1.3.0"
-  val scalatestScalacheck = "3.2.10.0"
+  val scalatestScalacheck = "3.2.11.0"
   val scalamock           = "5.2.0"
   val shapeless2          = "2.3.10"
   val shapeless3          = "3.0.3"
-  val testContainers      = "0.40.10"
+  val testContainers      = "0.40.11"
 }
