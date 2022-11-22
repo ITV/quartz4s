@@ -4,7 +4,6 @@ addSbtPlugin("com.github.daniel-shuy"    % "sbt-release-mdoc" % "1.0.1")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"     % "0.1.22")
 addSbtPlugin("com.github.sbt"            % "sbt-ci-release"   % "1.5.11")
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"      % "0.6.4")
-addSbtPlugin("me.pdalpra"                % "sbt-autoversion"  % "2.0.0")
 
 val mdocVersion = "2.3.6"
 addSbtPlugin("org.scalameta"            % "sbt-mdoc" % mdocVersion)
