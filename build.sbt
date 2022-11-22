@@ -27,7 +27,7 @@ val commonSettings: Seq[Setting[_]] = Seq(
   Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("https://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / pomIncludeRepository          := { _ => false },
-  developers := Seq(Developer("adamkingitv", "Adam James King", "adam.king@itv.com", url"http://itv.com"))
+  developers := Seq(Developer("adamkingitv", "Adam James King", "adam.king@itv.com", url("http://itv.com")))
 )
 
 def createProject(projectName: String): Project =
