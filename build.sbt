@@ -26,40 +26,8 @@ val commonSettings: Seq[Setting[_]] = Seq(
   crossScalaVersions                        := Seq("2.13.10", scalaVersion.value),
   Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("https://itv.com/itv-oss-licence-v1.0")),
-  ThisBuild / publishTo                     := sonatypePublishToBundle.value,
   ThisBuild / pomIncludeRepository          := { _ => false },
-  publishMavenStyle                         := true,
-  pomExtra                                  :=
-    <url>https://github.com/ITV/quartz4s</url>
-    <developers>
-      <developer>
-        <id>agustafson</id>
-        <name>Andrew Gustafson</name>
-        <organization>ITV</organization>
-        <organizationUrl>http://www.itv.com</organizationUrl>
-      </developer>
-      <developer>
-        <id>jbwheatley</id>
-        <name>Jack Wheatley</name>
-        <organization>ITV</organization>
-        <organizationUrl>http://www.itv.com</organizationUrl>
-      </developer>
-      <developer>
-        <id>adamkingitv</id>
-        <name>Adam King</name>
-        <organization>ITV</organization>
-        <organizationUrl>http://www.itv.com</organizationUrl>
-      </developer>
-    </developers>,
-  credentials ++= {
-    sys.env
-      .get("SONATYPE_USER")
-      .zip(sys.env.get("SONATYPE_PASSWORD"))
-      .map { case (user, pass) =>
-        Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass)
-      }
-      .toSeq
-  }
+  developers := Seq(Developer("adamkingitv", "Adam James King", "adam.king@itv.com", url"http://itv.com"))
 )
 
 def createProject(projectName: String): Project =
