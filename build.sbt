@@ -8,7 +8,7 @@ val commonSettings: Seq[Setting[?]] = Seq(
     compilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
   ).filterNot(_ => scalaVersion.value.startsWith("3.")),
   scalacOptions ++= {
-    if scalaVersion.value.startsWith("3.") then Nil
+    if (scalaVersion.value.startsWith("3.")) Nil
     else Seq("-Ytasty-reader", "-Xsource:3", """-Wconf:msg=package object inheritance is deprecated:i""")
   },
   Test / packageDoc / publishArtifact := false,
@@ -57,7 +57,7 @@ lazy val core = createProject("core")
       "org.typelevel"  %% "cats-laws"        % Versions.cats            % Test,
       "org.typelevel"  %% "discipline-munit" % Versions.disciplineMunit % Test,
     ) ++ {
-      if scalaVersion.value.startsWith("3.") then {
+      if (scalaVersion.value.startsWith("3.")) {
         Seq(
           "org.typelevel" %% "shapeless3-deriving" % Versions.shapeless3,
         )
