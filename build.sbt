@@ -24,7 +24,6 @@ val commonSettings: Seq[Setting[?]] = Seq(
   organizationName                          := "ITV",
   scalaVersion                              := "3.2.0",
   crossScalaVersions                        := Seq("2.13.8", scalaVersion.value),
-  Global / bloopAggregateSourceDependencies := true,
   licenses                                  := Seq("ITV-OSS" -> url("https://itv.com/itv-oss-licence-v1.0")),
   ThisBuild / pomIncludeRepository          := { _ => false },
   developers := List(Developer("adamkingitv", "Adam James King", "adam.king@itv.com", url("http://itv.com")))
