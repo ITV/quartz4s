@@ -1,7 +1,7 @@
 package com.itv.scheduler.extruder
 
 import com.itv.scheduler.JobDataEncoder
-import shapeless._
+import shapeless.*
 import shapeless.labelled.FieldType
 
 import scala.reflect.ClassTag

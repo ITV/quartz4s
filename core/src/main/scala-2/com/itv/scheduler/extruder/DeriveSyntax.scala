@@ -2,10 +2,10 @@ package com.itv.scheduler
 package extruder
 
 import cats.data.Chain
-import shapeless._
+import shapeless.*
 
 trait DeriveSyntax {
-  def deriveJobDecoder[A](implicit ev: Lazy[DerivedJobDecoder[A]]): JobDecoder[A] = ev.value
+  def deriveJobDecoder[A](implicit ev: Lazy[DerivedJobDecoder[A]]): JobDecoder[A]         = ev.value
   def deriveJobEncoder[A](implicit ev: Lazy[DerivedJobDataEncoder[A]]): JobDataEncoder[A] = ev.value
   def deriveJobCodec[A](implicit ev1: Lazy[DerivedJobDecoder[A]], ev2: Lazy[DerivedJobDataEncoder[A]]): JobCodec[A] =
     new JobCodec[A] {
